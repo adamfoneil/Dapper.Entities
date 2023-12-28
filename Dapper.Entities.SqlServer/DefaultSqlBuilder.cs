@@ -1,6 +1,5 @@
 ﻿using Dapper.Entities.Abstract;
 using Dapper.Entities.Interfaces;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
 
 namespace Dapper.Entities.SqlServer;
@@ -9,7 +8,7 @@ public class DefaultSqlBuilder : SqlBuilder
 {
 	public override SqlStatements BuildStatements(Type entityType)
 	{
-		var (schema, name) = ParseTableName(entityType);
+		var (schema, name) = ParseTableName(entityType, "dbo");
 		var tableName = $"[{schema}].[{name}]";
 
 		return new()
@@ -53,9 +52,7 @@ public class DefaultSqlBuilder : SqlBuilder
 		return
 			$@"UPDATE {tableName} SET {string.Join(", ", columns.Where(col => col.ForUpdate).Select(SetExpression))}
             WHERE {string.Join(" AND ", columns.Where(UpdateOrDelete).Select(SetExpression))}";
-	}
-
-	private static bool UpdateOrDelete(ColumnMapping mapping) => mapping.IsKey && !mapping.ForUpdate;
+	}	
 
 	private static string BuildInsert(string tableName, Type entityType)
 	{
@@ -71,27 +68,6 @@ public class DefaultSqlBuilder : SqlBuilder
             ) VALUES (
                 {insertValues}
             ); SELECT SCOPE_IDENTITY()";
-	}
-
-	private static (string Schema, string Name) ParseTableName(Type type)
-	{
-		var schema = "dbo";
-		var name = type.Name;
-
-		if (type.HasAttribute<TableAttribute>(out var tableAttr))
-		{
-			if (!string.IsNullOrWhiteSpace(tableAttr.Schema))
-			{
-				schema = tableAttr.Schema;
-			}
-
-			if (!string.IsNullOrWhiteSpace(tableAttr.Name))
-			{
-				name = tableAttr.Name;
-			}
-		}
-
-		return (schema, name);
 	}
 
 	private static string SetExpression(ColumnMapping columnMapping) => $"[{columnMapping.ColumnName}]=@{columnMapping.ParameterName}";	

@@ -11,10 +11,33 @@ public abstract class SqlBuilder : ISqlBuilder
 {
 	public abstract SqlStatements BuildStatements(Type entityType);
 
+	protected static (string Schema, string Name) ParseTableName(Type type, string defaultSchema)
+	{
+		var schema = defaultSchema;
+		var name = type.Name;
+
+		if (type.HasAttribute<TableAttribute>(out var tableAttr))
+		{
+			if (!string.IsNullOrWhiteSpace(tableAttr.Schema))
+			{
+				schema = tableAttr.Schema;
+			}
+
+			if (!string.IsNullOrWhiteSpace(tableAttr.Name))
+			{
+				name = tableAttr.Name;
+			}
+		}
+
+		return (schema, name);
+	}
+
+	protected static bool UpdateOrDelete(ColumnMapping mapping) => mapping.IsKey && !mapping.ForUpdate;
+
 	protected static IEnumerable<ColumnMapping> GetColumnMappings(Type entityType, StatementType statementType) =>
 		entityType.GetProperties()
 		.Where(pi => DefaultPropertyFilter(statementType, pi))
-		.Select(DefaultColumnMapping);
+		.Select(DefaultColumnMapping);	
 
 	private static bool DefaultPropertyFilter(StatementType statementType, PropertyInfo propertyInfo)
 	{

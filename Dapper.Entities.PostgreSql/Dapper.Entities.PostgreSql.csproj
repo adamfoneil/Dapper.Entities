@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Dapper.Entities\Abstract\SqlBuilder.cs" Link="Base\Abstract\SqlBuilder.cs" />
+    <Compile Include="..\Dapper.Entities\Database.cs" Link="Base\Database.cs" />
+    <Compile Include="..\Dapper.Entities\Exceptions\RepositoryException.cs" Link="Base\Exceptions\RepositoryException.cs" />
+    <Compile Include="..\Dapper.Entities\Extensions\CrudExtensions.cs" Link="Base\Extensions\CrudExtensions.cs" />
+    <Compile Include="..\Dapper.Entities\Extensions\MemberInfoExtensions.cs" Link="Base\Extensions\MemberInfoExtensions.cs" />
+    <Compile Include="..\Dapper.Entities\Repository.cs" Link="Base\Repository.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Base\Exceptions\" />
+    <Folder Include="Base\Extensions\" />
+    <Folder Include="Base\Abstract\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Dapper" Version="2.1.24" />
+    <PackageReference Include="Dapper.Entities.Abstractions" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
+    <PackageReference Include="Npgsql" Version="8.0.1" />
+  </ItemGroup>
+
+</Project>
