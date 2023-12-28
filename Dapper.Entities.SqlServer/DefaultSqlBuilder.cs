@@ -24,7 +24,7 @@ public class DefaultSqlBuilder : ISqlBuilder
 		};
 	}
 
-	private string BuildGetByAlternateKey(string tableName, Type entityType)
+	private static string BuildGetByAlternateKey(string tableName, Type entityType)
 	{
 		var columns = GetColumnMappings(entityType, StatementType.Update);
 
@@ -135,7 +135,7 @@ public class DefaultSqlBuilder : ISqlBuilder
 			ParameterName = propertyInfo.Name
 		};
 
-		string GetColumnName(PropertyInfo propertyInfo)
+		static string GetColumnName(PropertyInfo propertyInfo)
 		{
 			var attr = propertyInfo.GetCustomAttribute<ColumnAttribute>();
 			return (attr is not null && !string.IsNullOrEmpty(attr.Name)) ? attr.Name : propertyInfo.Name;

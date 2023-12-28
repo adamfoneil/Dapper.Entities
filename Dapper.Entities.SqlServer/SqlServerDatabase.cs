@@ -9,9 +9,8 @@ public class SqlServerDatabase : Database
 {
 	private readonly string _connectionString;
 
-	public SqlServerDatabase(string connectionString, ILogger<SqlServerDatabase> logger) : base(logger, new DefaultSqlBuilder())
+	public SqlServerDatabase(string connectionString, ILogger<SqlServerDatabase> logger) : this(connectionString, logger, new DefaultSqlBuilder())
 	{
-		_connectionString = connectionString;
 	}
 
 	public SqlServerDatabase(string connectionString, ILogger<SqlServerDatabase> logger, ISqlBuilder sqlBuilder) : base(logger, sqlBuilder)
