@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageId>Dapper.Entities.Abstractions</PackageId>
+    <Title>Dapper.Entities Abstractions</Title>
+    <Version>8.0.0</Version>
+    <Authors>Adam O'Neil</Authors>
+    <Description>Interfaces and attributes used with Dapper.Entities library</Description>
+    <Copyright>Copyright (c) 2023 Adam O'Neil</Copyright>
+    <PackageProjectUrl>https://github.com/adamfoneil/Dapper.Entities</PackageProjectUrl>
+    <PackageReadmeFile>readme.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/adamfoneil/Dapper.Entities</RepositoryUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <IncludeSymbols>True</IncludeSymbols>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Update="readme.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+</Project>

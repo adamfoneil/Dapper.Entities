@@ -1,0 +1,23 @@
+on:
+  workflow_dispatch: 
+jobs:
+  build:
+    runs-on: windows
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+
+    - name: Install dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+
+    - name: Test
+      run: dotnet test --no-restore --verbosity minimal
+
+    - name: Push
+      run: dotnet nuget push ./nupkgs/*.nupkg -k ${{ secrets.NUGETAPIKEY }} -s https://api.nuget.org/v3/index.json
