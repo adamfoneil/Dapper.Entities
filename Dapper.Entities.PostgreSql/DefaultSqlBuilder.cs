@@ -66,11 +66,11 @@ public class DefaultSqlBuilder : SqlBuilder
 
 	private string BuildInsert(string tableName, Type entityType)
 	{
-		var columns = GetColumnMappings(entityType, StatementType.Insert);
+		var columns = GetColumnMappings(entityType, StatementType.Insert).Where(col => col.ForInsert).ToArray();
 		if (!columns.Any(col => col.ForInsert)) throw new ArgumentException("Must have at least one insert column");
 
-		var insertCols = string.Join(", ", columns.Where(col => col.ForInsert).Select(col => FormatName(col.ColumnName)));
-		var insertValues = string.Join(", ", columns.Where(col => col.ForInsert).Select(col => $"@{col.ParameterName}"));
+		var insertCols = string.Join(", ", columns.Select(col => FormatName(col.ColumnName)));
+		var insertValues = string.Join(", ", columns.Select(col => $"@{col.ParameterName}"));
 
 		return
 			$@"INSERT INTO {tableName} (
