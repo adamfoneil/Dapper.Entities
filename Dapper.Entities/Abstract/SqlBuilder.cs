@@ -55,11 +55,10 @@ public abstract class SqlBuilder : ISqlBuilder
 
 	protected static bool UpdateOrDelete(ColumnMapping mapping) => mapping.IsKey && !mapping.ForUpdate;
 
-	protected static string GetKeyColumnCriteria(Type entityType, Func<ColumnMapping, string> columnNameBuilder)
-	{
-		var columns = GetColumnMappings(entityType).ToArray();
+	protected static string GetKeyColumnCriteria(string tableName, IEnumerable<ColumnMapping> columns, Func<ColumnMapping, string> columnNameBuilder)
+	{		
 		var keyColumns = columns.Where(col => col.ForUpdate && col.IsKey).Select(columnNameBuilder);
-		if (!keyColumns.Any()) throw new NotImplementedException($"Entity type {entityType.Name} is missing [Key] columns.");
+		if (!keyColumns.Any()) throw new NotImplementedException($"Entity type for {tableName} is missing [Key] columns.");
 		return string.Join(" AND ", keyColumns);
 	}
 

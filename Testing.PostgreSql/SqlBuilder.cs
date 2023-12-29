@@ -14,7 +14,7 @@ public class SqlBuilder
 		var statements = builder.BuildStatements(typeof(SampleEntity));
 
 		Assert.IsTrue(statements.GetById.Equals(
-			"SELECT * FROM whatever.sample WHERE id = @id"));
+			"SELECT id AS Id, name AS Name, description AS Description FROM whatever.sample WHERE id = @id"));
 
 		Assert.IsTrue(statements.Insert.Equals(
 			"INSERT INTO whatever.sample (name, description) VALUES (@Name, @Description) RETURNING id;"));
@@ -23,12 +23,12 @@ public class SqlBuilder
 			"UPDATE whatever.sample SET name=@Name, description=@Description WHERE id=@Id"));
 
 		Assert.IsTrue(statements.Delete.Equals(
-			"DELETE whatever.sample WHERE id=@Id"));
+			"DELETE FROM whatever.sample WHERE id=@Id"));
 
 		Assert.IsTrue(statements.HasAlternateKey);
 
 		Assert.IsTrue(statements.GetByAlternateKey.Equals(
-			"SELECT * FROM whatever.sample WHERE name=@Name"));
+			"SELECT id AS Id, name AS Name, description AS Description FROM whatever.sample WHERE name=@Name"));
 	}
 
 	[TestMethod]
@@ -38,7 +38,7 @@ public class SqlBuilder
 		var statements = builder.BuildStatements(typeof(ExoticEntity));
 
 		Assert.IsTrue(statements.GetById.Equals(
-			"SELECT * FROM public.exotic_entity WHERE exotic_id = @id"));
+			"SELECT exotic_id AS Id, name AS Name, value AS Value, aliased AS AliasedColumn, date_created AS DateCreated, date_modified AS DateModified FROM public.exotic_entity WHERE exotic_id = @id"));
 
 		Assert.IsTrue(statements.Insert.Equals(
 			"INSERT INTO public.exotic_entity (name, value, aliased, date_created) VALUES (@Name, @Value, @AliasedColumn, @DateCreated) RETURNING id;"));
@@ -47,7 +47,7 @@ public class SqlBuilder
 			"UPDATE public.exotic_entity SET name=@Name, value=@Value, aliased=@AliasedColumn, date_modified=@DateModified WHERE exotic_id=@Id"));
 
 		Assert.IsTrue(statements.Delete.Equals(
-			"DELETE public.exotic_entity WHERE exotic_id=@Id"));
+			"DELETE FROM public.exotic_entity WHERE exotic_id=@Id"));
 
 		Assert.IsFalse(statements.HasAlternateKey);
 
@@ -67,11 +67,11 @@ public class SqlBuilder
 			"UPDATE public.composite_key_entity SET something_id=@SomethingId, name=@Name, description=@Description, date_modified=@DateModified WHERE id=@Id"));
 
 		Assert.IsTrue(statements.Delete.Equals(
-			"DELETE public.composite_key_entity WHERE id=@Id"));
+			"DELETE FROM public.composite_key_entity WHERE id=@Id"));
 
 		Assert.IsTrue(statements.HasAlternateKey);
 
 		Assert.IsTrue(statements.GetByAlternateKey.Equals(
-			"SELECT * FROM public.composite_key_entity WHERE something_id=@SomethingId AND name=@Name"));
+			"SELECT id AS Id, something_id AS SomethingId, name AS Name, description AS Description, date_created AS DateCreated, date_modified AS DateModified FROM public.composite_key_entity WHERE something_id=@SomethingId AND name=@Name"));
 	}
 }

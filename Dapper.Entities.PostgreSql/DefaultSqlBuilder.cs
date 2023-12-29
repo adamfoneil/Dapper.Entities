@@ -32,12 +32,13 @@ public class DefaultSqlBuilder : SqlBuilder
 		var columnMappings = GetColumnMappings(entityType);
 		var columnsByPropertyName = columnMappings.ToDictionary(col => col.ParameterName);
 		var identityCol = columnsByPropertyName["Id"].ColumnName;
+		var selectColumnNames = string.Join(", ", columnMappings.Select(col => $"{FormatName(col.ColumnName)} AS {col.ParameterName}"));
 
 		return new()
 		{
-			GetById = $"SELECT * FROM {tableName} WHERE {FormatName(identityCol)} = @id",
+			GetById = $"SELECT {selectColumnNames} FROM {tableName} WHERE {FormatName(identityCol)} = @id",
 			HasAlternateKey = hasAlternateKey,
-			GetByAlternateKey = hasAlternateKey ? BuildGetByAlternateKey(tableName, entityType) : string.Empty,
+			GetByAlternateKey = hasAlternateKey ? BuildGetByAlternateKey(tableName, selectColumnNames, columnMappings) : string.Empty,
 			Insert = BuildInsert(tableName, columnMappings),
 			Update = BuildUpdate(tableName, columnMappings),
 			Delete = BuildDelete(tableName, columnMappings)
@@ -47,7 +48,7 @@ public class DefaultSqlBuilder : SqlBuilder
 	private string BuildDelete(string tableName, IEnumerable<ColumnMapping> columns)
 	{
 		var deleteCriteria = GetDeleteCriteria(columns, SetExpression);
-		return $"DELETE {tableName} WHERE {deleteCriteria}";
+		return $"DELETE FROM {tableName} WHERE {deleteCriteria}";
 	}
 
 	private string BuildUpdate(string tableName, IEnumerable<ColumnMapping> columns)
@@ -56,10 +57,10 @@ public class DefaultSqlBuilder : SqlBuilder
 		return $"UPDATE {tableName} SET {setColumns} WHERE {whereClause}";
 	}
 
-	private string BuildGetByAlternateKey(string tableName, Type entityType)
+	private string BuildGetByAlternateKey(string tableName, string columnNames, IEnumerable<ColumnMapping> columns)
 	{
-		var criteria = GetKeyColumnCriteria(entityType, SetExpression);
-		return $"SELECT * FROM {tableName} WHERE {criteria}";
+		var criteria = GetKeyColumnCriteria(tableName, columns, SetExpression);
+		return $"SELECT {columnNames} FROM {tableName} WHERE {criteria}";
 	}	
 
 	private string BuildInsert(string tableName, IEnumerable<ColumnMapping> columns)

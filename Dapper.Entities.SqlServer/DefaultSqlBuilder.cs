@@ -17,16 +17,16 @@ public class DefaultSqlBuilder : SqlBuilder
 		{
 			GetById = $"SELECT * FROM {tableName} WHERE [{columnsByPropertyName["Id"].ColumnName}]=@Id",
 			HasAlternateKey = hasAlternateKey,
-			GetByAlternateKey = hasAlternateKey ? BuildGetByAlternateKey(tableName, entityType) : string.Empty,
+			GetByAlternateKey = hasAlternateKey ? BuildGetByAlternateKey(tableName, columnMappings) : string.Empty,
 			Insert = BuildInsert(tableName, columnMappings),
 			Update = BuildUpdate(tableName, columnMappings),
 			Delete = BuildDelete(tableName, columnMappings)
 		};
 	}
 
-	private static string BuildGetByAlternateKey(string tableName, Type entityType)
+	private static string BuildGetByAlternateKey(string tableName, IEnumerable<ColumnMapping> columns)
 	{
-		var criteria = GetKeyColumnCriteria(entityType, SetExpression);
+		var criteria = GetKeyColumnCriteria(tableName, columns, SetExpression);
 		return $"SELECT * FROM {tableName} WHERE {criteria}";
 	}
 
