@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Testing.Models;
 
@@ -6,6 +7,7 @@ namespace Testing.Models;
 public class SampleEntity
 {
 	public int Id { get; set; }
+	[Key]
 	public string Name { get; set; } = default!;
 	public string Description { get; set; } = default!;
 	[NotMapped]

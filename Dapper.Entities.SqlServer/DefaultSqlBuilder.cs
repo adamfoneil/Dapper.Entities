@@ -30,7 +30,7 @@ public class DefaultSqlBuilder : SqlBuilder
 
 		var criteria = string.Join(" AND ", keyColumns);
 
-		return $"SELECT * FROM {tableName} WHERE {keyColumns}";
+		return $"SELECT * FROM {tableName} WHERE {criteria}";
 	}
 
 	private static string BuildDelete(string tableName, Type entityType)
