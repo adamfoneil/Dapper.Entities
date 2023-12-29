@@ -1,6 +1,8 @@
 SqlServer package:
-
 [![Nuget](https://img.shields.io/nuget/v/Dapper.Entities.SqlServer)](https://www.nuget.org/packages/Dapper.Entities.SqlServer/)
+
+PostgreSql package:
+[![Nuget](https://img.shields.io/nuget/v/Dapper.Entities.PostgreSql)](https://www.nuget.org/packages/Dapper.Entities.PostgreSql/)
 
 This is a minimal ORM framework that uses Dapper and a repository pattern approach. The only hard dependency on your entity classes is that they implement [IEntity\<TKey\>](https://github.com/adamfoneil/Dapper.Entities/blob/master/Dapper.Entities.Abstractions/Interfaces/IEntity.cs). It lets you write code like this (Blazor):
 
