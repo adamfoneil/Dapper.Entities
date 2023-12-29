@@ -5,17 +5,12 @@ using System.Data;
 
 namespace Dapper.Entities.SqlServer;
 
-public class SqlServerDatabase : Database
+public class SqlServerDatabase(string connectionString, ILogger<SqlServerDatabase> logger, ISqlBuilder sqlBuilder) : Database(logger, sqlBuilder)
 {
-	private readonly string _connectionString;
+	private readonly string _connectionString = connectionString;
 
 	public SqlServerDatabase(string connectionString, ILogger<SqlServerDatabase> logger) : this(connectionString, logger, new DefaultSqlBuilder())
 	{
-	}
-
-	public SqlServerDatabase(string connectionString, ILogger<SqlServerDatabase> logger, ISqlBuilder sqlBuilder) : base(logger, sqlBuilder)
-	{
-		_connectionString = connectionString;
 	}
 
 	public override IDbConnection GetConnection() => new SqlConnection(_connectionString);
