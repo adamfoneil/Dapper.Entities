@@ -32,6 +32,30 @@ public abstract class SqlBuilder : ISqlBuilder
 		return (schema, name);
 	}
 
+	protected static (string Columns, string Values) GetInsertComponents(Type entityType, Func<ColumnMapping, string> columnNameBuilder)
+	{
+		var columns = GetColumnMappings(entityType, StatementType.Insert).Where(col => col.ForInsert).ToArray();
+		if (!columns.Any(col => col.ForInsert)) throw new ArgumentException("Must have at least one insert column");
+
+		var insertCols = string.Join(", ", columns.Select(col => columnNameBuilder(col)));
+		var insertValues = string.Join(", ", columns.Select(col => $"@{col.ParameterName}"));
+
+		return (insertCols, insertValues);
+	}
+
+	protected static (string SetValues, string WhereClause) GetUpdateComponents(Type entityType, Func<ColumnMapping, string> expressionBuilder)
+	{
+		var columns = GetColumnMappings(entityType, StatementType.Update);
+
+		if (!columns.Any(col => col.IsKey)) throw new ArgumentException("Must have at least one key column");
+		if (!columns.Any(col => col.ForUpdate)) throw new ArgumentException("Must have at least one update column");
+
+		var setValues = string.Join(", ", columns.Where(col => col.ForUpdate).Select(col => expressionBuilder(col)));
+		var whereClause = string.Join(" AND ", columns.Where(UpdateOrDelete).Select(col => expressionBuilder(col)));
+
+		return (setValues, whereClause);
+	}
+
 	protected static bool UpdateOrDelete(ColumnMapping mapping) => mapping.IsKey && !mapping.ForUpdate;
 
 	protected static IEnumerable<ColumnMapping> GetColumnMappings(Type entityType, StatementType statementType) =>

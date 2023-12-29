@@ -18,6 +18,5 @@ public class PostgreSqlDatabase : Database
 		_connectionString = connectionString;
 	}
 
-	public override IDbConnection GetConnection() => new NpgsqlConnection(_connectionString);
-	
+	public override IDbConnection GetConnection() => new NpgsqlConnection(_connectionString);	
 }

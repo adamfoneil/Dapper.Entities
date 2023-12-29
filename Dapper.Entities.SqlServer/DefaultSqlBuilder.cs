@@ -44,30 +44,14 @@ public class DefaultSqlBuilder : SqlBuilder
 
 	private static string BuildUpdate(string tableName, Type entityType)
 	{
-		var columns = GetColumnMappings(entityType, StatementType.Update);
-
-		if (!columns.Any(col => col.IsKey)) throw new ArgumentException("Must have at least one key column");
-		if (!columns.Any(col => col.ForUpdate)) throw new ArgumentException("Must have at least one update column");
-
-		return
-			$@"UPDATE {tableName} SET {string.Join(", ", columns.Where(col => col.ForUpdate).Select(SetExpression))}
-            WHERE {string.Join(" AND ", columns.Where(UpdateOrDelete).Select(SetExpression))}";
+		var (setColumns, whereClause) = GetUpdateComponents(entityType, SetExpression);
+		return $"UPDATE {tableName} SET {setColumns} WHERE {whereClause}";
 	}	
 
 	private static string BuildInsert(string tableName, Type entityType)
 	{
-		var columns = GetColumnMappings(entityType, StatementType.Insert);
-		if (!columns.Any(col => col.ForInsert)) throw new ArgumentException("Must have at least one insert column");
-
-		var insertCols = string.Join(", ", columns.Where(col => col.ForInsert).Select(col => $"[{col.ColumnName}]"));
-		var insertValues = string.Join(", ", columns.Where(col => col.ForInsert).Select(col => $"@{col.ParameterName}"));
-
-		return
-			$@"INSERT INTO {tableName} (
-                {insertCols}
-            ) VALUES (
-                {insertValues}
-            ); SELECT SCOPE_IDENTITY()";
+		var (columns, values) = GetInsertComponents(entityType, (col) => $"[{col.ColumnName}]");
+		return $@"INSERT INTO {tableName} ({columns}) VALUES ({values}); SELECT SCOPE_IDENTITY()";
 	}
 
 	private static string SetExpression(ColumnMapping columnMapping) => $"[{columnMapping.ColumnName}]=@{columnMapping.ParameterName}";	
