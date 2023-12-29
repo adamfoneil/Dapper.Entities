@@ -4,6 +4,18 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <PackageId>Dapper.Entities.PostgreSql</PackageId>
+    <Title>Dapper.Entities for PostgreSql</Title>
+    <Version>8.0.0-alpha</Version>
+    <Authors>Adam O'Neil</Authors>
+    <Description>Flexible and minimal repository access with Dapper, PostgreSql and your entity classes</Description>
+    <Copyright>Copyright (c) 2023 Adam O'Neil</Copyright>
+    <PackageProjectUrl>https://github.com/adamfoneil/Dapper.Entities</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/adamfoneil/Dapper.Entities</RepositoryUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <IncludeSymbols>True</IncludeSymbols>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,6 +31,13 @@
     <Folder Include="Base\Exceptions\" />
     <Folder Include="Base\Extensions\" />
     <Folder Include="Base\Abstract\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
