@@ -56,6 +56,9 @@ public static class CrudExtensions
 	{
 		ArgumentNullException.ThrowIfNull(SqlBuilder, nameof(SqlBuilder));
 
-		TypeSqlBuilders.TryAdd(typeof(TEntity), SqlBuilder.BuildStatements(typeof(TEntity)));		
+		if (!TypeSqlBuilders.ContainsKey(typeof(TEntity)))
+		{
+			TypeSqlBuilders.Add(typeof(TEntity), SqlBuilder.BuildStatements(typeof(TEntity)));
+		}
 	}
 }
