@@ -5,6 +5,9 @@ namespace Dapper.Entities.Extensions;
 
 public static class CrudExtensions
 {
+	/// <summary>
+	/// global SQL builder convention -- set this in startup before using any of the crud extension methods
+	/// </summary>
 	public static ISqlBuilder? SqlBuilder { get; set; }
 
 	private static readonly Dictionary<Type, SqlStatements> TypeSqlBuilders = [];
@@ -13,9 +16,7 @@ public static class CrudExtensions
 		where TEntity : IEntity<TKey>
 		where TKey : struct
 	{
-		AddSql<TEntity, TKey>();
-
-		var sql = TypeSqlBuilders[typeof(TEntity)].GetById;
+		var sql = GetSqlStatements<TEntity, TKey>().GetById;
 		return await connection.QuerySingleOrDefaultAsync<TEntity>(sql, new { id }, transaction);
 	}
 
@@ -23,9 +24,7 @@ public static class CrudExtensions
 		where TEntity : IEntity<TKey>
 		where TKey : struct
 	{
-		AddSql<TEntity, TKey>();
-
-		var sql = TypeSqlBuilders[typeof(TEntity)].Insert;
+		var sql = GetSqlStatements<TEntity, TKey>().Insert;
 		var id = await connection.ExecuteScalarAsync<TKey>(sql, entity, transaction);
 		entity.Id = id;
 
@@ -36,8 +35,7 @@ public static class CrudExtensions
 		where TEntity : IEntity<TKey>
 		where TKey : struct
 	{
-		AddSql<TEntity, TKey>();
-		var sql = TypeSqlBuilders[typeof(TEntity)].Update;
+		var sql = GetSqlStatements<TEntity, TKey>().Update;
 		await connection.ExecuteAsync(sql, entity, transaction);
 	}
 
@@ -45,12 +43,11 @@ public static class CrudExtensions
 		where TEntity : IEntity<TKey>
 		where TKey : struct
 	{
-		AddSql<TEntity, TKey>();
-		var sql = TypeSqlBuilders[typeof(TEntity)].Delete;
+		var sql = GetSqlStatements<TEntity, TKey>().Delete;
 		await connection.ExecuteAsync(sql, new { id }, transaction);
 	}
 
-	private static void AddSql<TEntity, TKey>()
+	private static SqlStatements GetSqlStatements<TEntity, TKey>()
 		where TEntity : IEntity<TKey>
 		where TKey : struct
 	{
@@ -60,5 +57,7 @@ public static class CrudExtensions
 		{
 			TypeSqlBuilders.Add(typeof(TEntity), SqlBuilder.BuildStatements(typeof(TEntity)));
 		}
+
+		return TypeSqlBuilders[typeof(TEntity)];		
 	}
 }

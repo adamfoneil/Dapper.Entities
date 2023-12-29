@@ -26,14 +26,14 @@ public class Crud : IntegrationBase
 		var savedId = biz.Id;
 		Assert.IsTrue(savedId != 0);
 
-		biz = await cn.GetAsync<Business, long>(savedId, txn);
+		biz = await cn.GetAsync<Business, long>(savedId, txn) ?? throw new Exception("row not found");
 		Assert.IsTrue(savedId == biz.Id);
 
 		biz.Email = "anyone2@nowhere.org";
 		biz.UserId = "whatever3";
 		await cn.UpdateAsync<Business, long>(biz, txn);
 
-		biz = await cn.GetAsync<Business, long>(biz.Id, txn);
+		biz = await cn.GetAsync<Business, long>(biz.Id, txn) ?? throw new Exception("row not found");
 		Assert.IsTrue(biz.Email.Equals("anyone2@nowhere.org"));
 		Assert.IsTrue(biz.UserId.Equals("whatever3"));
 
