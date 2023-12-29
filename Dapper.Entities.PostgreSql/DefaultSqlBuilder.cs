@@ -26,47 +26,57 @@ public class DefaultSqlBuilder : SqlBuilder
 
 	public override SqlStatements BuildStatements(Type entityType)
 	{
-		var (schema, name) = ParseTableName(entityType, "public");
+		var (schema, name) = ParseTableName(entityType, "public", FormatName);
 		var tableName = $"{schema}.{name}";
+		bool hasAlternateKey = HasAlternateKey(entityType);
+		var columnMappings = GetColumnMappings(entityType);
+		var columnsByPropertyName = columnMappings.ToDictionary(col => col.ParameterName);
+		var identityCol = columnsByPropertyName["Id"].ColumnName;
 
 		return new()
 		{
-			GetById = $"SELECT * FROM {tableName} WHERE id = @id",
-			GetByAlternateKey = BuildGetByAlternateKey(tableName, entityType),
-			Insert = BuildInsert(tableName, entityType),
-			Update = BuildUpdate(tableName, entityType),
-			Delete = BuildDelete(tableName, entityType)
+			GetById = $"SELECT * FROM {tableName} WHERE {FormatName(identityCol)} = @id",
+			HasAlternateKey = hasAlternateKey,
+			GetByAlternateKey = hasAlternateKey ? BuildGetByAlternateKey(tableName, entityType) : string.Empty,
+			Insert = BuildInsert(tableName, columnMappings),
+			Update = BuildUpdate(tableName, columnMappings),
+			Delete = BuildDelete(tableName, columnMappings)
 		};
 	}
 
-	private string BuildDelete(string tableName, Type entityType)
+	private string BuildDelete(string tableName, IEnumerable<ColumnMapping> columns)
 	{
-		throw new NotImplementedException();
+		var deleteCriteria = GetDeleteCriteria(columns, SetExpression);
+		return $"DELETE {tableName} WHERE {deleteCriteria}";
 	}
 
-	private string BuildUpdate(string tableName, Type entityType)
+	private string BuildUpdate(string tableName, IEnumerable<ColumnMapping> columns)
 	{
-		throw new NotImplementedException();
+		var (setColumns, whereClause) = GetUpdateComponents(columns, SetExpression);
+		return $"UPDATE {tableName} SET {setColumns} WHERE {whereClause}";
 	}
 
 	private string BuildGetByAlternateKey(string tableName, Type entityType)
 	{
-		throw new NotImplementedException();
+		var criteria = GetKeyColumnCriteria(entityType, SetExpression);
+		return $"SELECT * FROM {tableName} WHERE {criteria}";
+	}	
+
+	private string BuildInsert(string tableName, IEnumerable<ColumnMapping> columns)
+	{
+		var (names, values) = GetInsertComponents(columns, (col) => FormatName(col.ColumnName));
+		return $@"INSERT INTO {tableName} ({names}) VALUES ({values}) RETURNING {FormatName("Id")};";
 	}
 
 	private string FormatName(string input) => CaseConversion switch
 	{
 		CaseConversionOptions.Exact => $"\"{input}\"",
 		CaseConversionOptions.SnakeCase => ToSnakeCase(input),
-		_  => input
+		_ => input
 	};
 
-	private static string ToSnakeCase(string input) =>
-		string.Join(string.Empty, input.Select((c, index) => (char.IsUpper(c) && index > 0) ? $"_{c}" : c.ToString()));
+	public static string ToSnakeCase(string input) =>
+		string.Join(string.Empty, input.Select((c, index) => (char.IsUpper(c) && index > 0) ? $"_{c.ToString().ToLower()}" : c.ToString().ToLower()));
 
-	private string BuildInsert(string tableName, Type entityType)
-	{
-		var (columns, values) = GetInsertComponents(entityType, (col) => FormatName(col.ColumnName));
-		return $@"INSERT INTO {tableName} ({columns}) VALUES ({values}) RETURNING {FormatName("id")};";
-	}
+	private string SetExpression(ColumnMapping columnMapping) => $"{FormatName(columnMapping.ColumnName)}=@{columnMapping.ParameterName}";
 }

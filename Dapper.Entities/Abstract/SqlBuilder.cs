@@ -3,6 +3,7 @@ using Dapper.Entities.Interfaces;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
+using System.Linq.Expressions;
 using System.Reflection;
 
 namespace Dapper.Entities.Abstract;
@@ -11,10 +12,11 @@ public abstract class SqlBuilder : ISqlBuilder
 {
 	public abstract SqlStatements BuildStatements(Type entityType);
 
-	protected static (string Schema, string Name) ParseTableName(Type type, string defaultSchema)
+	protected static (string Schema, string Name) ParseTableName(Type type, string defaultSchema, Func<string, string>? nameFormatter = null)
 	{
 		var schema = defaultSchema;
 		var name = type.Name;
+		nameFormatter ??= name => name;
 
 		if (type.HasAttribute<TableAttribute>(out var tableAttr))
 		{
@@ -29,24 +31,19 @@ public abstract class SqlBuilder : ISqlBuilder
 			}
 		}
 
-		return (schema, name);
+		return (nameFormatter(schema), nameFormatter(name));
 	}
 
-	protected static (string Columns, string Values) GetInsertComponents(Type entityType, Func<ColumnMapping, string> columnNameBuilder)
-	{
-		var columns = GetColumnMappings(entityType, StatementType.Insert).Where(col => col.ForInsert).ToArray();
+	protected static (string Columns, string Values) GetInsertComponents(IEnumerable<ColumnMapping> columns, Func<ColumnMapping, string> columnNameBuilder)
+	{		
 		if (!columns.Any(col => col.ForInsert)) throw new ArgumentException("Must have at least one insert column");
-
-		var insertCols = string.Join(", ", columns.Select(col => columnNameBuilder(col)));
-		var insertValues = string.Join(", ", columns.Select(col => $"@{col.ParameterName}"));
-
+		var insertCols = string.Join(", ", columns.Where(col => col.ForInsert).Select(col => columnNameBuilder(col)));
+		var insertValues = string.Join(", ", columns.Where(col => col.ForInsert).Select(col => $"@{col.ParameterName}"));
 		return (insertCols, insertValues);
 	}
 
-	protected static (string SetValues, string WhereClause) GetUpdateComponents(Type entityType, Func<ColumnMapping, string> expressionBuilder)
+	protected static (string SetValues, string WhereClause) GetUpdateComponents(IEnumerable<ColumnMapping> columns, Func<ColumnMapping, string> expressionBuilder)
 	{
-		var columns = GetColumnMappings(entityType, StatementType.Update);
-
 		if (!columns.Any(col => col.IsKey)) throw new ArgumentException("Must have at least one key column");
 		if (!columns.Any(col => col.ForUpdate)) throw new ArgumentException("Must have at least one update column");
 
@@ -58,17 +55,32 @@ public abstract class SqlBuilder : ISqlBuilder
 
 	protected static bool UpdateOrDelete(ColumnMapping mapping) => mapping.IsKey && !mapping.ForUpdate;
 
-	protected static IEnumerable<ColumnMapping> GetColumnMappings(Type entityType, StatementType statementType) =>
-		entityType.GetProperties()
-		.Where(pi => DefaultPropertyFilter(statementType, pi))
-		.Select(DefaultColumnMapping);	
+	protected static string GetKeyColumnCriteria(Type entityType, Func<ColumnMapping, string> columnNameBuilder)
+	{
+		var columns = GetColumnMappings(entityType).ToArray();
+		var keyColumns = columns.Where(col => col.ForUpdate && col.IsKey).Select(columnNameBuilder);
+		if (!keyColumns.Any()) throw new NotImplementedException($"Entity type {entityType.Name} is missing [Key] columns.");
+		return string.Join(" AND ", keyColumns);
+	}
 
-	private static bool DefaultPropertyFilter(StatementType statementType, PropertyInfo propertyInfo)
+	protected static string GetDeleteCriteria(IEnumerable<ColumnMapping> columns, Func<ColumnMapping, string> columnNameBuilder)
+	{		
+		if (!columns.Any(col => col.IsKey)) throw new ArgumentException("Must have at least one key column");
+		return string.Join(" AND ", columns.Where(UpdateOrDelete).Select(columnNameBuilder));
+	}
+
+	protected static ColumnMapping[] GetColumnMappings(Type entityType) =>
+		entityType.GetProperties()
+			.Where(DefaultPropertyFilter)
+			.Select(DefaultColumnMapping)
+			.ToArray();
+
+	protected static bool HasAlternateKey(Type entityType) => GetColumnMappings(entityType).Any(m => m.IsKey && m.ForUpdate);
+
+	private static bool DefaultPropertyFilter(PropertyInfo propertyInfo)
 	{
 		if (!propertyInfo.CanRead) return false;
 		if (propertyInfo.HasAttribute<NotMappedAttribute>(out _)) return false;
-		if (statementType is StatementType.Insert && propertyInfo.HasAttribute<NotInsertedAttribute>(out _)) return false;
-		if (statementType is StatementType.Update && propertyInfo.HasAttribute<NotUpdatedAttribute>(out _)) return false;
 
 		if (propertyInfo.PropertyType.IsValueType) return true;
 		if (propertyInfo.PropertyType.Equals(typeof(string))) return true;
@@ -91,8 +103,8 @@ public abstract class SqlBuilder : ISqlBuilder
 		return new()
 		{
 			IsKey = propertyInfo.HasAttribute<KeyAttribute>(out _),
-			ForUpdate = true,
-			ForInsert = true,
+			ForUpdate = !propertyInfo.HasAttribute<NotUpdatedAttribute>(out _),
+			ForInsert = !propertyInfo.HasAttribute<NotInsertedAttribute>(out _),
 			ColumnName = GetColumnName(propertyInfo),
 			ParameterName = propertyInfo.Name
 		};
@@ -106,7 +118,13 @@ public abstract class SqlBuilder : ISqlBuilder
 
 	protected class ColumnMapping
 	{
+		/// <summary>
+		/// this is usually the C# property, but can be aliased with the [Column] attribute
+		/// </summary>
 		public string ColumnName { get; set; } = string.Empty;
+		/// <summary>
+		/// this is always the C# property name
+		/// </summary>
 		public string ParameterName { get; set; } = string.Empty;
 		public bool ForInsert { get; set; }
 		public bool ForUpdate { get; set; }

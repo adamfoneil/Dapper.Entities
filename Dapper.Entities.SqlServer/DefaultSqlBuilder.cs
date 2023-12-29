@@ -1,6 +1,5 @@
 ﻿using Dapper.Entities.Abstract;
 using Dapper.Entities.Interfaces;
-using System.Data;
 
 namespace Dapper.Entities.SqlServer;
 
@@ -9,49 +8,44 @@ public class DefaultSqlBuilder : SqlBuilder
 	public override SqlStatements BuildStatements(Type entityType)
 	{
 		var (schema, name) = ParseTableName(entityType, "dbo");
-		var tableName = $"[{schema}].[{name}]";
+		var tableName = $"[{schema}].[{name}]";		
+		bool hasAlternateKey = HasAlternateKey(entityType);
+		var columnMappings = GetColumnMappings(entityType);
+		var columnsByPropertyName = columnMappings.ToDictionary(col => col.ParameterName);
 
 		return new()
 		{
-			GetById = $"SELECT * FROM {tableName} WHERE [Id] = @id",
-			GetByAlternateKey = BuildGetByAlternateKey(tableName, entityType),
-			Insert = BuildInsert(tableName, entityType),
-			Update = BuildUpdate(tableName, entityType),
-			Delete = BuildDelete(tableName, entityType)
+			GetById = $"SELECT * FROM {tableName} WHERE [{columnsByPropertyName["Id"].ColumnName}]=@Id",
+			HasAlternateKey = hasAlternateKey,
+			GetByAlternateKey = hasAlternateKey ? BuildGetByAlternateKey(tableName, entityType) : string.Empty,
+			Insert = BuildInsert(tableName, columnMappings),
+			Update = BuildUpdate(tableName, columnMappings),
+			Delete = BuildDelete(tableName, columnMappings)
 		};
 	}
 
 	private static string BuildGetByAlternateKey(string tableName, Type entityType)
 	{
-		var columns = GetColumnMappings(entityType, StatementType.Update);
-
-		var keyColumns = columns.Where(col => col.ForUpdate && col.IsKey).Select(SetExpression);
-		if (!keyColumns.Any()) return string.Empty;
-
-		var criteria = string.Join(" AND ", keyColumns);
-
+		var criteria = GetKeyColumnCriteria(entityType, SetExpression);
 		return $"SELECT * FROM {tableName} WHERE {criteria}";
 	}
 
-	private static string BuildDelete(string tableName, Type entityType)
+	private static string BuildDelete(string tableName, IEnumerable<ColumnMapping> columns)
 	{
-		var columns = GetColumnMappings(entityType, StatementType.Delete);
-
-		if (!columns.Any(col => col.IsKey)) throw new ArgumentException("Must have at least one key column");
-
-		return $"DELETE {tableName} WHERE {string.Join(" AND ", columns.Where(UpdateOrDelete).Select(SetExpression))}";
+		var deleteCriteria = GetDeleteCriteria(columns, SetExpression);
+		return $"DELETE {tableName} WHERE {deleteCriteria}";
 	}
 
-	private static string BuildUpdate(string tableName, Type entityType)
+	private static string BuildUpdate(string tableName, IEnumerable<ColumnMapping> columns)
 	{
-		var (setColumns, whereClause) = GetUpdateComponents(entityType, SetExpression);
+		var (setColumns, whereClause) = GetUpdateComponents(columns, SetExpression);
 		return $"UPDATE {tableName} SET {setColumns} WHERE {whereClause}";
 	}	
 
-	private static string BuildInsert(string tableName, Type entityType)
+	private static string BuildInsert(string tableName, IEnumerable<ColumnMapping> columns)
 	{
-		var (columns, values) = GetInsertComponents(entityType, (col) => $"[{col.ColumnName}]");
-		return $@"INSERT INTO {tableName} ({columns}) VALUES ({values}); SELECT SCOPE_IDENTITY()";
+		var (names, values) = GetInsertComponents(columns, (col) => $"[{col.ColumnName}]");
+		return $@"INSERT INTO {tableName} ({names}) VALUES ({values}); SELECT SCOPE_IDENTITY()";
 	}
 
 	private static string SetExpression(ColumnMapping columnMapping) => $"[{columnMapping.ColumnName}]=@{columnMapping.ParameterName}";	

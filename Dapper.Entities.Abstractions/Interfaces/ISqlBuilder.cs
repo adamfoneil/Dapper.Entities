@@ -8,6 +8,7 @@ public interface ISqlBuilder
 public class SqlStatements
 {
 	public string GetById { get; init; } = default!;
+	public bool HasAlternateKey { get; init; }
 	public string GetByAlternateKey { get; init; } = default!;
 	public string Insert { get; init; } = default!;
 	public string Update { get; init; } = default!;

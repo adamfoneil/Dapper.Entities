@@ -15,6 +15,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Testing.SqlServer", "Testin
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dapper.Entities.PostgreSql", "Dapper.Entities.PostgreSql\Dapper.Entities.PostgreSql.csproj", "{68BEA16C-B900-429E-9A0F-09B4D21E6981}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Testing.PostgreSql", "Testing.PostgreSql\Testing.PostgreSql.csproj", "{0055FEBA-A674-4331-85B0-4FC5DC5C241D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{68BEA16C-B900-429E-9A0F-09B4D21E6981}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{68BEA16C-B900-429E-9A0F-09B4D21E6981}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{68BEA16C-B900-429E-9A0F-09B4D21E6981}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0055FEBA-A674-4331-85B0-4FC5DC5C241D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0055FEBA-A674-4331-85B0-4FC5DC5C241D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0055FEBA-A674-4331-85B0-4FC5DC5C241D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0055FEBA-A674-4331-85B0-4FC5DC5C241D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
