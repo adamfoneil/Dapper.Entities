@@ -100,6 +100,9 @@ You can use the `[NotMapped]` attribute on columns that don't save directly to y
 
 Use the `[Key]` attribute on any combination of properties to define an entity's alternate key. This lets you take advantage of the [MergeAsync](https://github.com/adamfoneil/Dapper.Entities/blob/master/Dapper.Entities/Repository.cs#L121) method, which searches for an existing row before inserting a new row. Do not use `[Key]` on the `Id` property. It's already understood to be a key. In my tests, notice I use the `[Key]` attribute [here](https://github.com/adamfoneil/Dapper.Entities/blob/master/Testing.Common/Data/Entities/Business.cs#L8-L9) to define uniqueness of the `UserId` property.
 
+# Extension Methods
+If you need more direct entity access without a repository class, there are `IDbConnection` CRUD [extension methods](https://github.com/adamfoneil/Dapper.Entities/blob/master/Dapper.Entities/Extensions/CrudExtensions.cs). These methods don't apply any "business logic" per se that a repository class would, but are offered for convenience. See [tests](https://github.com/adamfoneil/Dapper.Entities/blob/master/Testing.SqlServer/Crud.cs) to see these in use.
+
 # SQL generation
 The low-level `Database` class (from which the SQL Server implementation derives) [constructor](https://github.com/adamfoneil/Dapper.Entities/blob/master/Dapper.Entities/Database.cs#L7) accepts an [ISqlBuilder](https://github.com/adamfoneil/Dapper.Entities/blob/master/Dapper.Entities.Abstractions/Interfaces/ISqlBuilder.cs). This is responsible for generating the SQL statements used by `Repository` classes. I offer a default implementation [DefaultSqlBuilder](https://github.com/adamfoneil/Dapper.Entities/blob/master/Dapper.Entities.SqlServer/DefaultSqlBuilder.cs) for SQL Server. You can implement this yourself to generate SQL however you like. My implementation is a bare-bones approach that does not do concurrency checking, for example.
 
