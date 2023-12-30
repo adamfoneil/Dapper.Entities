@@ -35,7 +35,11 @@ async Task Save() => await Db.Business.SaveAsync(model);
 Service `MyDatabase` is injected, giving access to any number of database tables. In this example it's using a `Business` table and calling `GetAsync` to fetch a row, and `SaveAsync` to insert or update a row.
 
 # Walkthrough
-1. Start by creating a class that derives from `SqlServerDatabase`, passing a connection string and `ILogger` in the constructor.
+This assumes use of the [SQL Server package](https://www.nuget.org/packages/Dapper.Entities.SqlServer), but the instructions are essentially the same with [PostgreSql](https://www.nuget.org/packages/Dapper.Entities.PostgreSql).
+
+1. In your entity project, add the [Dapper.Entities.Abstractions](https://www.nuget.org/packages/Dapper.Entities.Abstractions) package. This gives you the `IEntity` interface you need in subsequent steps. All your entity classes should implement `IEntity`.
+
+2. In your application project, create a class that derives from `SqlServerDatabase`, passing a connection string and `ILogger` in the constructor.
 
 <details>
   <summary>Code</summary>
@@ -52,7 +56,7 @@ public class MyDatabase : SqlServerDatabase
 ```
 </details>
 
-2. Add a `Repository` class that encapsulates conventions the tables in your database follow. In this example, I'm setting a convention that all my tables will have `int` keys, but you can choose any struct type you want. If there's business logic that applies to all or most tables, it would go in this class as well. There are many overrides you can implement to customize repository behavior, adding trigger-like behavior, permission checks, and multi-tenant isolation, for example. This is a bare-bones example below.
+3. Add a `Repository` class that encapsulates conventions the tables in your database follow. In this example, I'm setting a convention that all my tables will have `int` keys, but you can choose any struct type you want. If there's business logic that applies to all or most tables, it would go in this class as well. There are many overrides you can implement to customize repository behavior, adding trigger-like behavior, permission checks, and multi-tenant isolation, for example. This is a bare-bones example below.
  
 <details>
   <summary>Code</summary>
@@ -67,7 +71,7 @@ public class BaseRepository<TEntity> : Repository<MyDatabase, TEntity, int> wher
 ```
 </details>
 
-3. Go back and add repository properties to your `MyDatabase` class like this. In this example, I'm adding a `Business` repository along with `Another` and `YetAnother`. These should be model classes in your application. The `Business` example comes from the test [here](https://github.com/adamfoneil/Dapper.Entities/blob/master/Testing.Common/Data/Entities/Business.cs).
+4. Go back and add repository properties to your `MyDatabase` class like this. In this example, I'm adding a `Business` repository along with `Another` and `YetAnother`. These should be model classes in your application. The `Business` example comes from the test [here](https://github.com/adamfoneil/Dapper.Entities/blob/master/Testing.Common/Data/Entities/Business.cs).
 
 <details>
   <summary>Code</summary>
@@ -87,7 +91,7 @@ public class MyDatabase : SqlServerDatabase
 ```
 </details>
 
-4. In the startup of your application add your `Database` class to your services collection as either a scoped or singleton dependency. Now throughout your application you can inject it where needed and have access to your repository classes.
+5. In the startup of your application add your `Database` class to your services collection as either a scoped or singleton dependency. Now throughout your application you can inject it where needed and have access to your repository classes.
 
 # Entity class considerations
 The only requirement for entity classes you use with this library is that they implement [IEntity\<TKey\>](https://github.com/adamfoneil/Dapper.Entities/blob/master/Dapper.Entities.Abstractions/Interfaces/IEntity.cs). This gives your entity classes an `Id` property in the struct type of your choice.
