@@ -37,7 +37,7 @@ Service `MyDatabase` is injected, giving access to any number of database tables
 # Walkthrough
 This assumes use of the [SQL Server package](https://www.nuget.org/packages/Dapper.Entities.SqlServer), but the instructions are essentially the same with [PostgreSql](https://www.nuget.org/packages/Dapper.Entities.PostgreSql).
 
-1. In your entity project, add the [Dapper.Entities.Abstractions](https://www.nuget.org/packages/Dapper.Entities.Abstractions) package. This gives you the `IEntity` interface you need in subsequent steps. All your entity classes should implement `IEntity`.
+1. In your entity project, add the [Dapper.Entities.Abstractions](https://www.nuget.org/packages/Dapper.Entities.Abstractions) package. This gives you the `IEntity` interface you need in subsequent steps. All your entity classes should implement `IEntity`. This is the same regardless of your database platform.
 
 2. In your application project, create a class that derives from `SqlServerDatabase`, passing a connection string and `ILogger` in the constructor.
 
