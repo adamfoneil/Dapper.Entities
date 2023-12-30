@@ -87,6 +87,8 @@ public class MyDatabase : SqlServerDatabase
 ```
 </details>
 
+4. In the startup of your application add your `Database` class to your services collection as either a scoped or singleton dependency. Now throughout your application you can inject it where needed and have access to your repository classes.
+
 # Entity class considerations
 The only requirement for entity classes you use with this library is that they implement [IEntity\<TKey\>](https://github.com/adamfoneil/Dapper.Entities/blob/master/Dapper.Entities.Abstractions/Interfaces/IEntity.cs). This gives your entity classes an `Id` property in the struct type of your choice.
 
