@@ -20,6 +20,51 @@ public static class CrudExtensions
 		return await connection.QuerySingleOrDefaultAsync<TEntity>(sql, new { id }, transaction);
 	}
 
+	public static async Task<TEntity?> GetByAlternateKeyAsync<TEntity, TKey>(this IDbConnection connection, TEntity entity, IDbTransaction? transaction = null)
+		where TEntity : IEntity<TKey>
+		where TKey : struct
+	{
+		var statements = GetSqlStatements<TEntity, TKey>();
+		if (!statements.HasAlternateKey) throw new NotImplementedException($"Entity class {typeof(TEntity).Name} is missing one or more [Key] properties.");
+		var sql = statements.GetByAlternateKey;
+		return await connection.QuerySingleOrDefaultAsync<TEntity>(sql, entity, transaction);
+	}
+
+	public static async Task<TEntity> SaveAsync<TEntity, TKey>(this IDbConnection connection, TEntity entity, IDbTransaction? transaction = null)
+		where TEntity : IEntity<TKey>
+		where TKey : struct
+	{
+		if (entity.IsNew())
+		{
+			return await InsertAsync<TEntity, TKey>(connection, entity, transaction);
+		}
+		else
+		{
+			await UpdateAsync<TEntity, TKey>(connection, entity, transaction);
+			return entity;
+		}
+	}
+
+	/// <summary>
+	/// when saving a new row, checks for an existing row based on a combination of [Key] properties before inserting
+	/// </summary>
+	public static async Task<TEntity> MergeAsync<TEntity, TKey>(this IDbConnection connection, TEntity entity, IDbTransaction? transaction = null, Action<TEntity, TEntity>? onExisting = null)
+		where TEntity : IEntity<TKey>
+		where TKey : struct
+	{
+		if (entity.IsNew())
+		{
+			var existing = await GetByAlternateKeyAsync<TEntity, TKey>(connection, entity, transaction);
+			if (existing != null)
+			{				
+				onExisting?.Invoke(entity, existing);
+				entity.Id = existing.Id;
+			}
+		}
+		
+		return await SaveAsync<TEntity, TKey>(connection, entity, transaction);
+	}
+
 	public static async Task<TEntity> InsertAsync<TEntity, TKey>(this IDbConnection connection, TEntity entity, IDbTransaction? transaction = null)
 		where TEntity : IEntity<TKey>
 		where TKey : struct

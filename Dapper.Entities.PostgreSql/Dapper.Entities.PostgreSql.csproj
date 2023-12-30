@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <PackageId>Dapper.Entities.PostgreSql</PackageId>
     <Title>Dapper.Entities for PostgreSql</Title>
-    <Version>8.0.0-alpha</Version>
+    <Version>8.0.1-alpha</Version>
     <Authors>Adam O'Neil</Authors>
     <Description>Flexible and minimal repository access with Dapper, PostgreSql and your entity classes</Description>
     <Copyright>Copyright (c) 2023 Adam O'Neil</Copyright>

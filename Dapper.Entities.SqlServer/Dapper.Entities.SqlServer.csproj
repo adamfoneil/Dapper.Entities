@@ -7,7 +7,7 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageId>Dapper.Entities.SqlServer</PackageId>
     <Title>Dapper.Entities for SQL Server</Title>
-    <Version>8.0.2</Version>
+    <Version>8.0.3</Version>
     <Authors>Adam O'Neil</Authors>
     <Description>Flexible and minimal repository access with Dapper, SQL Server and your entity classes</Description>
     <Copyright>Copyright (c) 2023 Adam O'Neil</Copyright>
