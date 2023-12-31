@@ -122,7 +122,7 @@ public class Repository<TDatabase, TEntity, TKey>
 	{
 		if (entity.IsNew())
 		{
-			if (string.IsNullOrEmpty(_sqlStatements.GetByAlternateKey))
+			if (!_sqlStatements.HasAlternateKey)
 			{
 				throw new NotImplementedException($"Entity type {typeof(TEntity).Name} must have at least one updateable column with the [Key] attribute to use with the MergeAsync method");
 			}
