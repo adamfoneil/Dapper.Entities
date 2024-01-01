@@ -118,7 +118,7 @@ public class Repository<TDatabase, TEntity, TKey>
 		return await SaveAsync(cn, entity);
 	}
 
-	public async Task<TEntity> MergeAsync(IDbConnection connection, TEntity entity, IDbTransaction? transaction = null)
+	public async Task<TEntity> MergeAsync(IDbConnection connection, TEntity entity, Action<TEntity, TEntity>? onExisting = null, IDbTransaction? transaction = null)
 	{
 		if (entity.IsNew())
 		{
@@ -128,7 +128,11 @@ public class Repository<TDatabase, TEntity, TKey>
 			}
 
 			var existing = await connection.QuerySingleOrDefaultAsync<TEntity>(_sqlStatements.GetByAlternateKey, entity, transaction);
-			if (existing is not null) entity.Id = existing.Id;
+			if (existing is not null)
+			{
+				onExisting?.Invoke(entity, existing);
+				entity.Id = existing.Id;
+			}
 		}
 
 		return await SaveAsync(entity);
