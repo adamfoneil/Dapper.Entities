@@ -138,6 +138,12 @@ public class Repository<TDatabase, TEntity, TKey>
 		return await SaveAsync(entity);
 	}
 
+	public async Task<TEntity> MergeAsync(TEntity entity, Action<TEntity, TEntity>? onExisting = null)
+	{
+		using var cn = Database.GetConnection();
+		return await MergeAsync(cn, entity, onExisting);
+	}
+
 	public async Task DeleteAsync(IDbConnection connection, TEntity entity, IDbTransaction? transaction = null)
 	{
 		ArgumentNullException.ThrowIfNull(nameof(entity));
