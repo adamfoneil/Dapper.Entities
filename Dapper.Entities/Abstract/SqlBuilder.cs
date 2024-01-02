@@ -1,9 +1,9 @@
-﻿using Dapper.Entities.Attributes;
+﻿using Dapper.Entities.Abstractions.Interfaces;
+using Dapper.Entities.Attributes;
 using Dapper.Entities.Interfaces;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
-using System.Linq.Expressions;
 using System.Reflection;
 
 namespace Dapper.Entities.Abstract;
@@ -68,13 +68,27 @@ public abstract class SqlBuilder : ISqlBuilder
 		return string.Join(" AND ", columns.Where(UpdateOrDelete).Select(columnNameBuilder));
 	}
 
-	protected static ColumnMapping[] GetColumnMappings(Type entityType) =>
-		entityType.GetProperties()
+	protected static ColumnMapping[] GetColumnMappings(Type entityType)
+	{
+		var results = entityType.GetProperties()
 			.Where(DefaultPropertyFilter)
 			.Select(DefaultColumnMapping)
 			.ToArray();
 
-	protected static bool HasAlternateKey(Type entityType) => GetColumnMappings(entityType).Any(m => m.IsKey && m.ForUpdate);
+		var instance = Activator.CreateInstance(entityType);
+		if (instance is IAlternateKey altKey)
+		{
+			foreach (var col in results.Join(altKey.AlternateKeyColumns, col => col.ColumnName, val => val, (col, val) => col))
+			{
+				col.IsKey = true;
+			}
+		}
+
+		return results;
+	}
+		
+
+	protected static bool HasAlternateKey(IEnumerable<ColumnMapping> columnMappings) => columnMappings.Any(m => m.IsKey && m.ForUpdate);
 
 	private static bool DefaultPropertyFilter(PropertyInfo propertyInfo)
 	{

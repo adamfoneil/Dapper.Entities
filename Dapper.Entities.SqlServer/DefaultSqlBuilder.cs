@@ -8,9 +8,9 @@ public class DefaultSqlBuilder : SqlBuilder
 	public override SqlStatements BuildStatements(Type entityType)
 	{
 		var (schema, name) = ParseTableName(entityType, "dbo");
-		var tableName = $"[{schema}].[{name}]";		
-		bool hasAlternateKey = HasAlternateKey(entityType);
+		var tableName = $"[{schema}].[{name}]";
 		var columnMappings = GetColumnMappings(entityType);
+		bool hasAlternateKey = HasAlternateKey(columnMappings);		
 		var columnsByPropertyName = columnMappings.ToDictionary(col => col.ParameterName);
 
 		return new()

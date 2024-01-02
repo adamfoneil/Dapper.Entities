@@ -7,7 +7,7 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageId>Dapper.Entities.Abstractions</PackageId>
     <Title>Dapper.Entities Abstractions</Title>
-    <Version>8.0.1</Version>
+    <Version>8.0.2</Version>
     <Authors>Adam O'Neil</Authors>
     <Description>Interfaces and attributes used with Dapper.Entities library</Description>
     <Copyright>Copyright (c) 2023 Adam O'Neil</Copyright>

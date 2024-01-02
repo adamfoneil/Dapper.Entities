@@ -28,8 +28,8 @@ public class DefaultSqlBuilder : SqlBuilder
 	{
 		var (schema, name) = ParseTableName(entityType, "public", FormatName);
 		var tableName = $"{schema}.{name}";
-		bool hasAlternateKey = HasAlternateKey(entityType);
 		var columnMappings = GetColumnMappings(entityType);
+		bool hasAlternateKey = HasAlternateKey(columnMappings);
 		var columnsByPropertyName = columnMappings.ToDictionary(col => col.ParameterName);
 		var identityCol = columnsByPropertyName["Id"].ColumnName;
 		var selectColumnNames = string.Join(", ", columnMappings.Select(col => $"{FormatName(col.ColumnName)} AS {col.ParameterName}"));

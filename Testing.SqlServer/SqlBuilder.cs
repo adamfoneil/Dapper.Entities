@@ -58,20 +58,24 @@ public class SqlBuilder
 	public void CompositeEntity()
 	{
 		var builder = new DefaultSqlBuilder();
-		var statements = builder.BuildStatements(typeof(CompositeKeyEntity));
 
-		Assert.IsTrue(statements.Insert.Equals(
-			"INSERT INTO [dbo].[CompositeKeyEntity] ([SomethingId], [Name], [Description], [DateCreated]) VALUES (@SomethingId, @Name, @Description, @DateCreated); SELECT SCOPE_IDENTITY()"));
+		foreach (var type in new[] { typeof(CompositeKeyEntity), typeof(CompositeKeyEntity2) })
+		{
+			var statements = builder.BuildStatements(type);
 
-		Assert.IsTrue(statements.Update.Equals(
-			"UPDATE [dbo].[CompositeKeyEntity] SET [SomethingId]=@SomethingId, [Name]=@Name, [Description]=@Description, [DateModified]=@DateModified WHERE [Id]=@Id"));
+			Assert.IsTrue(statements.Insert.Equals(
+				"INSERT INTO [dbo].[CompositeKeyEntity] ([SomethingId], [Name], [Description], [DateCreated]) VALUES (@SomethingId, @Name, @Description, @DateCreated); SELECT SCOPE_IDENTITY()"));
 
-		Assert.IsTrue(statements.Delete.Equals(
-			"DELETE [dbo].[CompositeKeyEntity] WHERE [Id]=@Id"));
+			Assert.IsTrue(statements.Update.Equals(
+				"UPDATE [dbo].[CompositeKeyEntity] SET [SomethingId]=@SomethingId, [Name]=@Name, [Description]=@Description, [DateModified]=@DateModified WHERE [Id]=@Id"));
 
-		Assert.IsTrue(statements.HasAlternateKey);
+			Assert.IsTrue(statements.Delete.Equals(
+				"DELETE [dbo].[CompositeKeyEntity] WHERE [Id]=@Id"));
 
-		Assert.IsTrue(statements.GetByAlternateKey.Equals(
-			"SELECT * FROM [dbo].[CompositeKeyEntity] WHERE [SomethingId]=@SomethingId AND [Name]=@Name"));
+			Assert.IsTrue(statements.HasAlternateKey);
+
+			Assert.IsTrue(statements.GetByAlternateKey.Equals(
+				"SELECT * FROM [dbo].[CompositeKeyEntity] WHERE [SomethingId]=@SomethingId AND [Name]=@Name"));
+		}		
 	}
 }
