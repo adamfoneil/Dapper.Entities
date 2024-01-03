@@ -60,6 +60,12 @@ public class Repository<TDatabase, TEntity, TKey>
         return await GetInnerAsync(connection, _sqlStatements.GetByAlternateKey, entity, transaction, "GetAlternate");
     }
 
+	public async Task<TEntity?> GetAlternateAsync(TEntity entity)
+	{
+		using var cn = Database.GetConnection();
+		return await GetAlternateAsync(cn, entity);
+	}
+
 	protected async Task<TEntity?> GetInnerAsync(IDbConnection connection, string sql, object parameter, IDbTransaction? transaction = null, string action = "Get")
 	{
 		Database.Logger.LogTrace("{action}: {query}, Id = {id}", action, sql, parameter);
