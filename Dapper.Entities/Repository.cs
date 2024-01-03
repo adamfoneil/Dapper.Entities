@@ -50,9 +50,19 @@ public class Repository<TDatabase, TEntity, TKey>
 		return await GetAsync(cn, id);
 	}
 
-	protected async Task<TEntity?> GetInnerAsync(IDbConnection connection, string sql, object parameter, IDbTransaction? transaction = null)
+	public async Task<TEntity?> GetAlternateAsync(IDbConnection connection, TEntity entity, IDbTransaction? transaction = null)
 	{
-		Database.Logger.LogTrace("{action}: {query}, Id = {id}", "Get", sql, parameter);
+        if (!_sqlStatements.HasAlternateKey)
+        {
+            throw new NotImplementedException($"Entity type {typeof(TEntity).Name} must have at least one updateable column with the [Key] attribute to use with the MergeAsync method");
+        }
+
+        return await GetInnerAsync(connection, _sqlStatements.GetByAlternateKey, entity, transaction, "GetAlternate");
+    }
+
+	protected async Task<TEntity?> GetInnerAsync(IDbConnection connection, string sql, object parameter, IDbTransaction? transaction = null, string action = "Get")
+	{
+		Database.Logger.LogTrace("{action}: {query}, Id = {id}", action, sql, parameter);
 
 		TEntity? result;
 
@@ -122,12 +132,7 @@ public class Repository<TDatabase, TEntity, TKey>
 	{
 		if (entity.IsNew())
 		{
-			if (!_sqlStatements.HasAlternateKey)
-			{
-				throw new NotImplementedException($"Entity type {typeof(TEntity).Name} must have at least one updateable column with the [Key] attribute to use with the MergeAsync method");
-			}
-
-			var existing = await connection.QuerySingleOrDefaultAsync<TEntity>(_sqlStatements.GetByAlternateKey, entity, transaction);
+			var existing = await GetAlternateAsync(connection, entity, transaction);
 			if (existing is not null)
 			{
 				onExisting?.Invoke(entity, existing);
