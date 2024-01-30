@@ -66,6 +66,12 @@ public class Repository<TDatabase, TEntity, TKey>
 		return await GetAlternateAsync(cn, entity);
 	}
 
+	public async Task<TEntity> MustGetAsync(IDbConnection connection, TKey id, IDbTransaction? transaction = null) =>
+		await GetAsync(connection, id, transaction) ?? throw new Exception($"{typeof(TEntity).Name} row id {id} not found");
+
+	public async Task<TEntity> MustGetAsync(TKey id) => 
+		await GetAsync(id) ?? throw new Exception($"{typeof(TEntity).Name} row id {id} not found");
+
 	protected async Task<TEntity?> GetInnerAsync(IDbConnection connection, string sql, object parameter, IDbTransaction? transaction = null, string action = "Get")
 	{
 		Database.Logger.LogTrace("{action}: {query}, Id = {id}", action, sql, parameter);
