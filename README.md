@@ -100,6 +100,8 @@ You can use the `[NotMapped]` attribute on columns that don't save directly to y
 
 Use the `[Key]` attribute on any combination of properties to define an entity's alternate key. This lets you take advantage of the [MergeAsync](https://github.com/adamfoneil/Dapper.Entities/blob/master/Dapper.Entities/Repository.cs#L137) method, which searches for an existing row before inserting a new row. Do not use `[Key]` on the `Id` property. It's already understood to be a key. In my tests, notice I use the `[Key]` attribute [here](https://github.com/adamfoneil/Dapper.Entities/blob/master/Testing.Common/Data/Entities/Business.cs#L8-L9) to define uniqueness of the `UserId` property.
 
+Note that if you use your entity classes with EF Core, you can't use multiple `[Key]` attributes on the same class. If you need your code to be EF-compatible, use the [IAlternateKey](https://github.com/adamfoneil/Dapper.Entities/blob/master/Dapper.Entities.Abstractions/Interfaces/IAlternateKey.cs) interface, as in [this example](https://github.com/adamfoneil/Dapper.Entities/blob/master/Testing.Common/Models/CompositeKeyEntity.cs#L19).
+
 # Extension Methods
 If you need more direct entity access without a repository class, there are `IDbConnection` CRUD [extension methods](https://github.com/adamfoneil/Dapper.Entities/blob/master/Dapper.Entities/Extensions/CrudExtensions.cs). These methods don't apply any "business logic" per se that a repository class would, but are offered for convenience. See [tests](https://github.com/adamfoneil/Dapper.Entities/blob/master/Testing.SqlServer/Crud.cs) to see these in use. (The [Postgres tests](https://github.com/adamfoneil/Dapper.Entities/blob/master/Testing.PostgreSql/Crud.cs) are essentially the same.)
 
