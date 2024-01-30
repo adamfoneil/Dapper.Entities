@@ -38,16 +38,16 @@ public class Repository<TDatabase, TEntity, TKey>
 	protected virtual string? CustomUpdateCommand { get; }
 	protected virtual string? CustomDeleteCommand { get; }
 
-	public async Task<TEntity?> GetAsync(IDbConnection connection, TKey id, IDbTransaction? transaction = null)
+	public async Task<TEntity?> GetOptionalAsync(IDbConnection connection, TKey id, IDbTransaction? transaction = null)
 	{
 		var sql = CustomGetCommand ?? _sqlStatements.GetById;
 		return await GetInnerAsync(connection, sql, new { id }, transaction);
 	}
 
-	public async Task<TEntity?> GetAsync(TKey id)
+	public async Task<TEntity?> GetOptionalAsync(TKey id)
 	{
 		using var cn = Database.GetConnection();
-		return await GetAsync(cn, id);
+		return await GetOptionalAsync(cn, id);
 	}
 
 	public async Task<TEntity?> GetAlternateAsync(IDbConnection connection, TEntity entity, IDbTransaction? transaction = null)
@@ -66,11 +66,11 @@ public class Repository<TDatabase, TEntity, TKey>
 		return await GetAlternateAsync(cn, entity);
 	}
 
-	public async Task<TEntity> MustGetAsync(IDbConnection connection, TKey id, IDbTransaction? transaction = null) =>
+	public async Task<TEntity> GetAsync(IDbConnection connection, TKey id, IDbTransaction? transaction = null) =>
 		await GetAsync(connection, id, transaction) ?? throw new Exception($"{typeof(TEntity).Name} row id {id} not found");
 
-	public async Task<TEntity> MustGetAsync(TKey id) => 
-		await GetAsync(id) ?? throw new Exception($"{typeof(TEntity).Name} row id {id} not found");
+	public async Task<TEntity> GetAsync(TKey id) => 
+		await GetOptionalAsync(id) ?? throw new Exception($"{typeof(TEntity).Name} row id {id} not found");
 
 	protected async Task<TEntity?> GetInnerAsync(IDbConnection connection, string sql, object parameter, IDbTransaction? transaction = null, string action = "Get")
 	{
