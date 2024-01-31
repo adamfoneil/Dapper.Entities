@@ -67,7 +67,7 @@ public class Repository<TDatabase, TEntity, TKey>
 	}
 
 	public async Task<TEntity> GetAsync(IDbConnection connection, TKey id, IDbTransaction? transaction = null) =>
-		await GetAsync(connection, id, transaction) ?? throw new Exception($"{typeof(TEntity).Name} row id {id} not found");
+		await GetOptionalAsync(connection, id, transaction) ?? throw new Exception($"{typeof(TEntity).Name} row id {id} not found");
 
 	public async Task<TEntity> GetAsync(TKey id) => 
 		await GetOptionalAsync(id) ?? throw new Exception($"{typeof(TEntity).Name} row id {id} not found");
