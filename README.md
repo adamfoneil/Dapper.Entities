@@ -117,6 +117,8 @@ In the walkthrough above, I have a single `BaseRepository` assumed to be used wi
 
 Check out my [Ensync](https://github.com/adamfoneil/Ensync) project to see how you can do code-first entity development in SQL Server without migrations. Please note I don't have this working for PostgreSql.
 
+See also [LiteInvoice3](https://github.com/adamfoneil/LiteInvoice3), an application I'm working on that uses this project for its data access layer.
+
 # Background
 This is an evolution of [Dapper.Repository](https://github.com/adamfoneil/Dapper.Repository), which I feel has gotten a bit complicated due to tight integration with authentication. I felt it was time to drop back and refactor, rethink some dependencies, and re-architect this from scratch. I've probably made two dozen or more ORM libraries over my career, so this is definitely a weird obsession I have. Crafting ORM libraries is one of those things devs are told not to do because the ORM problem is well-solved by much smarter people using very mature, well-tested libraries. But a truly great dev experience with data in C# remains somewhat elusive, in my opinion. I've played with EF Core a bit more than usual lately, and that's part of what's driving this effort. The truth is that I really *do not enjoy* working with EF Core. ALthough I've made some peace with migrations, having practiced some more, I still run into too many *gotchas* and annoyances with EF.
 
