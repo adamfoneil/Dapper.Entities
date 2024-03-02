@@ -1,4 +1,5 @@
 ﻿using Dapper.Entities.Abstractions.Interfaces;
+using Dapper.Entities.Abstractions.Models;
 using Dapper.Entities.Attributes;
 using Dapper.Entities.Interfaces;
 using System.ComponentModel.DataAnnotations;
@@ -126,20 +127,5 @@ public abstract class SqlBuilder : ISqlBuilder
 			var attr = propertyInfo.GetCustomAttribute<ColumnAttribute>();
 			return (attr is not null && !string.IsNullOrEmpty(attr.Name)) ? attr.Name : propertyInfo.Name;
 		}
-	}
-
-	protected class ColumnMapping
-	{
-		/// <summary>
-		/// this is usually the C# property, but can be aliased with the [Column] attribute
-		/// </summary>
-		public string ColumnName { get; set; } = string.Empty;
-		/// <summary>
-		/// this is always the C# property name
-		/// </summary>
-		public string ParameterName { get; set; } = string.Empty;
-		public bool ForInsert { get; set; }
-		public bool ForUpdate { get; set; }
-		public bool IsKey { get; set; }
-	}
+	}	
 }

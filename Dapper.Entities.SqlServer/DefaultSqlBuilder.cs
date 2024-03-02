@@ -1,4 +1,5 @@
 ﻿using Dapper.Entities.Abstract;
+using Dapper.Entities.Abstractions.Models;
 using Dapper.Entities.Interfaces;
 
 namespace Dapper.Entities.SqlServer;
@@ -20,7 +21,9 @@ public class DefaultSqlBuilder : SqlBuilder
 			GetByAlternateKey = hasAlternateKey ? BuildGetByAlternateKey(tableName, columnMappings) : string.Empty,
 			Insert = BuildInsert(tableName, columnMappings),
 			Update = BuildUpdate(tableName, columnMappings),
-			Delete = BuildDelete(tableName, columnMappings)
+			Delete = BuildDelete(tableName, columnMappings),
+			ColumnMappings = columnMappings,
+			TableName = tableName
 		};
 	}
 

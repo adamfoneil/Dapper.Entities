@@ -1,8 +1,10 @@
-﻿namespace Dapper.Entities.Interfaces;
+﻿using Dapper.Entities.Abstractions.Models;
+
+namespace Dapper.Entities.Interfaces;
 
 public interface ISqlBuilder
 {
-	SqlStatements BuildStatements(Type entityType);
+	SqlStatements BuildStatements(Type entityType);	
 }
 
 public class SqlStatements
@@ -13,5 +15,7 @@ public class SqlStatements
 	public string Insert { get; init; } = default!;
 	public string Update { get; init; } = default!;
 	public string Delete { get; init; } = default!;
+	public ColumnMapping[] ColumnMappings { get; init; } = [];
+	public string TableName { get; init; } = default!;
 }
 
