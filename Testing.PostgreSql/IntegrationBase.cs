@@ -5,7 +5,7 @@ using System.Data;
 namespace Testing.PostgreSql;
 
 public class IntegrationBase
-{	
+{
 	protected static async Task CreateSampleTable()
 	{
 		using var cn = GetConnection();
@@ -26,12 +26,12 @@ public class IntegrationBase
 					UNIQUE (user_id)
 				)");
 		}
-		catch 
+		catch
 		{
 			// ignore
-		}		
+		}
 	}
-	
+
 	protected static async Task DeleteSampleTable()
 	{
 		using var cn = GetConnection();
@@ -43,5 +43,5 @@ public class IntegrationBase
 		var cn = new NpgsqlConnection("Host=localhost;Port=5432;Database=DapperEntitiesTest;User Id=postgres;Password=hello.304");
 		cn.Open();
 		return cn;
-	}		
+	}
 }

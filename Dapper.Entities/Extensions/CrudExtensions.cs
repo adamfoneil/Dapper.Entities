@@ -56,12 +56,12 @@ public static class CrudExtensions
 		{
 			var existing = await GetByAlternateKeyAsync<TEntity, TKey>(connection, entity, transaction);
 			if (existing != null)
-			{				
+			{
 				onExisting?.Invoke(entity, existing);
 				entity.Id = existing.Id;
 			}
 		}
-		
+
 		return await SaveAsync<TEntity, TKey>(connection, entity, transaction);
 	}
 
@@ -103,6 +103,6 @@ public static class CrudExtensions
 			TypeSqlBuilders.Add(typeof(TEntity), SqlBuilder.BuildStatements(typeof(TEntity)));
 		}
 
-		return TypeSqlBuilders[typeof(TEntity)];		
+		return TypeSqlBuilders[typeof(TEntity)];
 	}
 }

@@ -61,7 +61,7 @@ public class DefaultSqlBuilder : SqlBuilder
 	{
 		var criteria = GetKeyColumnCriteria(tableName, columns, SetExpression);
 		return $"SELECT {columnNames} FROM {tableName} WHERE {criteria}";
-	}	
+	}
 
 	private string BuildInsert(string tableName, IEnumerable<ColumnMapping> columns)
 	{

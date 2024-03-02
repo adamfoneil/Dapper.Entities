@@ -36,11 +36,11 @@ public class IntegrationBase
 
 	protected static LiteInvoiceDatabase GetDatabase()
 	{
-		var serilogLogger = new LoggerConfiguration()			
+		var serilogLogger = new LoggerConfiguration()
 			.MinimumLevel.Verbose()
 			.WriteTo.Debug()
 			.CreateLogger();
-		
+
 		var logger = new SerilogLoggerFactory(serilogLogger)
 			.CreateLogger<LiteInvoiceDatabase>();
 

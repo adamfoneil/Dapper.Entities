@@ -76,6 +76,6 @@ public class SqlBuilder
 
 			Assert.IsTrue(statements.GetByAlternateKey.Equals(
 				"SELECT * FROM [dbo].[CompositeKeyEntity] WHERE [SomethingId]=@SomethingId AND [Name]=@Name"));
-		}		
+		}
 	}
 }

@@ -13,5 +13,5 @@ public class PostgreSqlDatabase(string connectionString, ILogger<PostgreSqlDatab
 	{
 	}
 
-	public override IDbConnection GetConnection() => new NpgsqlConnection(_connectionString);	
+	public override IDbConnection GetConnection() => new NpgsqlConnection(_connectionString);
 }

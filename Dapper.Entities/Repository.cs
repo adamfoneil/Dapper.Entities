@@ -52,13 +52,13 @@ public class Repository<TDatabase, TEntity, TKey>
 
 	public async Task<TEntity?> GetAlternateAsync(IDbConnection connection, TEntity entity, IDbTransaction? transaction = null)
 	{
-        if (!_sqlStatements.HasAlternateKey)
-        {
-            throw new NotImplementedException($"Entity type {typeof(TEntity).Name} must have at least one updateable column with the [Key] attribute to use with the MergeAsync method");
-        }
+		if (!_sqlStatements.HasAlternateKey)
+		{
+			throw new NotImplementedException($"Entity type {typeof(TEntity).Name} must have at least one updateable column with the [Key] attribute to use with the MergeAsync method");
+		}
 
-        return await GetInnerAsync(connection, _sqlStatements.GetByAlternateKey, entity, transaction, "GetAlternate");
-    }
+		return await GetInnerAsync(connection, _sqlStatements.GetByAlternateKey, entity, transaction, "GetAlternate");
+	}
 
 	public async Task<TEntity?> GetAlternateAsync(TEntity entity)
 	{
@@ -69,7 +69,7 @@ public class Repository<TDatabase, TEntity, TKey>
 	public async Task<TEntity> GetAsync(IDbConnection connection, TKey id, IDbTransaction? transaction = null) =>
 		await GetOptionalAsync(connection, id, transaction) ?? throw new Exception($"{typeof(TEntity).Name} row id {id} not found");
 
-	public async Task<TEntity> GetAsync(TKey id) => 
+	public async Task<TEntity> GetAsync(TKey id) =>
 		await GetOptionalAsync(id) ?? throw new Exception($"{typeof(TEntity).Name} row id {id} not found");
 
 	protected async Task<TEntity?> GetInnerAsync(IDbConnection connection, string sql, object parameter, IDbTransaction? transaction = null, string action = "Get")
@@ -136,7 +136,7 @@ public class Repository<TDatabase, TEntity, TKey>
 
 	public async Task<TEntity> SaveAsync(TEntity entity)
 	{
-		using var cn = Database.GetConnection();		
+		using var cn = Database.GetConnection();
 		return await SaveAsync(cn, entity);
 	}
 

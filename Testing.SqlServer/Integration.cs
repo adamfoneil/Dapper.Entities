@@ -5,7 +5,7 @@ namespace Testing.SqlServer;
 
 [TestClass]
 public class Integration : IntegrationBase
-{	
+{
 	[TestMethod]
 	public async Task InsertUpdateDelete()
 	{
@@ -15,7 +15,7 @@ public class Integration : IntegrationBase
 	}
 
 	private static async Task TestInternalAsync(LiteInvoiceDatabase db, IDbConnection cn, IDbTransaction? txn = null)
-	{	
+	{
 		var result = await db.Business.SaveAsync(cn, new Business()
 		{
 			UserId = "hello",

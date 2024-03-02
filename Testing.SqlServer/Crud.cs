@@ -15,7 +15,7 @@ public class Crud : IntegrationBase
 
 		using var cn = GetConnection();
 		using var txn = cn.BeginTransaction();
-		
+
 		var biz = await cn.InsertAsync<Business, long>(new()
 		{
 			DisplayName = "WhateverThis",
@@ -48,7 +48,7 @@ public class Crud : IntegrationBase
 	public async Task SaveAndMerge()
 	{
 		CrudExtensions.SqlBuilder = new DefaultSqlBuilder();
-		
+
 		using var cn = GetConnection();
 
 		const string KeyValue = "Whatever4";

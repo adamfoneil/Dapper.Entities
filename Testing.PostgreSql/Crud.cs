@@ -19,7 +19,7 @@ public class Crud : IntegrationBase
 	{
 		CrudExtensions.SqlBuilder = new DefaultSqlBuilder() { CaseConversion = CaseConversionOptions.SnakeCase };
 
-		using var cn = GetConnection();		
+		using var cn = GetConnection();
 		using var txn = cn.BeginTransaction();
 
 		var biz = await cn.InsertAsync<Business, long>(new()

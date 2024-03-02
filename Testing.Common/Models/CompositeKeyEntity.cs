@@ -7,8 +7,8 @@ namespace Testing.Common.Models;
 
 public class CompositeKeyEntity : IAlternateKey
 {
-	public int Id { get; set; }	
-	public int SomethingId { get; set; }	
+	public int Id { get; set; }
+	public int SomethingId { get; set; }
 	public string Name { get; set; } = default!;
 	public string Description { get; set; } = default!;
 	[NotUpdated]
@@ -16,7 +16,7 @@ public class CompositeKeyEntity : IAlternateKey
 	[NotInserted]
 	public DateTime? DateModified { get; set; }
 
-	public IEnumerable<string> AlternateKeyColumns => [ nameof(SomethingId), nameof(Name) ];
+	public IEnumerable<string> AlternateKeyColumns => [nameof(SomethingId), nameof(Name)];
 }
 
 /// <summary>

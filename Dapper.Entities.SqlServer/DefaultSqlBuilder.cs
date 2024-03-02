@@ -10,7 +10,7 @@ public class DefaultSqlBuilder : SqlBuilder
 		var (schema, name) = ParseTableName(entityType, "dbo");
 		var tableName = $"[{schema}].[{name}]";
 		var columnMappings = GetColumnMappings(entityType);
-		bool hasAlternateKey = HasAlternateKey(columnMappings);		
+		bool hasAlternateKey = HasAlternateKey(columnMappings);
 		var columnsByPropertyName = columnMappings.ToDictionary(col => col.ParameterName);
 
 		return new()
@@ -40,7 +40,7 @@ public class DefaultSqlBuilder : SqlBuilder
 	{
 		var (setColumns, whereClause) = GetUpdateComponents(columns, SetExpression);
 		return $"UPDATE {tableName} SET {setColumns} WHERE {whereClause}";
-	}	
+	}
 
 	private static string BuildInsert(string tableName, IEnumerable<ColumnMapping> columns)
 	{
@@ -48,5 +48,5 @@ public class DefaultSqlBuilder : SqlBuilder
 		return $@"INSERT INTO {tableName} ({names}) VALUES ({values}); SELECT SCOPE_IDENTITY()";
 	}
 
-	private static string SetExpression(ColumnMapping columnMapping) => $"[{columnMapping.ColumnName}]=@{columnMapping.ParameterName}";	
+	private static string SetExpression(ColumnMapping columnMapping) => $"[{columnMapping.ColumnName}]=@{columnMapping.ParameterName}";
 }

@@ -35,7 +35,7 @@ public abstract class SqlBuilder : ISqlBuilder
 	}
 
 	protected static (string Columns, string Values) GetInsertComponents(IEnumerable<ColumnMapping> columns, Func<ColumnMapping, string> columnNameBuilder)
-	{		
+	{
 		if (!columns.Any(col => col.ForInsert)) throw new ArgumentException("Must have at least one insert column");
 		var insertCols = string.Join(", ", columns.Where(col => col.ForInsert).Select(col => columnNameBuilder(col)));
 		var insertValues = string.Join(", ", columns.Where(col => col.ForInsert).Select(col => $"@{col.ParameterName}"));
@@ -56,14 +56,14 @@ public abstract class SqlBuilder : ISqlBuilder
 	protected static bool UpdateOrDelete(ColumnMapping mapping) => mapping.IsKey && !mapping.ForUpdate;
 
 	protected static string GetKeyColumnCriteria(string tableName, IEnumerable<ColumnMapping> columns, Func<ColumnMapping, string> columnNameBuilder)
-	{		
+	{
 		var keyColumns = columns.Where(col => col.ForUpdate && col.IsKey).Select(columnNameBuilder);
 		if (!keyColumns.Any()) throw new NotImplementedException($"Entity type for {tableName} is missing [Key] columns.");
 		return string.Join(" AND ", keyColumns);
 	}
 
 	protected static string GetDeleteCriteria(IEnumerable<ColumnMapping> columns, Func<ColumnMapping, string> columnNameBuilder)
-	{		
+	{
 		if (!columns.Any(col => col.IsKey)) throw new ArgumentException("Must have at least one key column");
 		return string.Join(" AND ", columns.Where(UpdateOrDelete).Select(columnNameBuilder));
 	}
@@ -86,7 +86,6 @@ public abstract class SqlBuilder : ISqlBuilder
 
 		return results;
 	}
-		
 
 	protected static bool HasAlternateKey(IEnumerable<ColumnMapping> columnMappings) => columnMappings.Any(m => m.IsKey && m.ForUpdate);
 
