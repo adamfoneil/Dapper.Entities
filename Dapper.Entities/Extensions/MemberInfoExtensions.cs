@@ -25,4 +25,17 @@ public static class MemberInfoExtensions
 
 		return false;
 	}
+	
+	/// <summary>
+	/// returns properties that have different values when comparing two objects
+	/// </summary>
+	public static IEnumerable<PropertyInfo> GetModifiedProperties<T>(this T @object, T compareWith, Dictionary<Type, string[]> propertyNamesByType)
+	{
+		if (!propertyNamesByType.ContainsKey(typeof(T)))
+		{
+			propertyNamesByType.Add(typeof(T), typeof(T).GetProperties().Select(pi => pi.Name).ToArray());
+		}
+
+		throw new NotImplementedException();
+	}
 }

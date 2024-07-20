@@ -1,5 +1,6 @@
 ﻿using Dapper.Entities.Interfaces;
 using System.Data;
+using System.Linq.Expressions;
 
 namespace Dapper.Entities.Extensions;
 
@@ -82,6 +83,11 @@ public static class CrudExtensions
 	{
 		var sql = GetSqlStatements<TEntity, TKey>().Update;
 		await connection.ExecuteAsync(sql, entity, transaction);
+	}
+
+	public static async Task UpdateAsync<TEntity, TKey>(this IDbConnection connection, TEntity entity, params Expression<Func<TEntity, object>>[] columnValues)
+	{
+
 	}
 
 	public static async Task DeleteAsync<TEntity, TKey>(this IDbConnection connection, TKey id, IDbTransaction? transaction = null)

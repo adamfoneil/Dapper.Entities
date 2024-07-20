@@ -84,4 +84,24 @@ public class Crud : IntegrationBase
 		Assert.AreEqual(mergedRow.DisplayName, "Save and Merge Test 2");
 		Assert.IsTrue(mergedRow.DateModified.HasValue);
 	}
+
+	[TestMethod]
+	public async Task CrudUpdate()
+	{
+        CrudExtensions.SqlBuilder = new DefaultSqlBuilder();
+
+        using var cn = GetConnection();
+
+        var biz = await cn.InsertAsync<Business, long>(new()
+        {
+            DisplayName = "WhateverThis3",
+            Email = "anyone@nowhere.org",
+            UserId = "whatever3",
+            DateCreated = DateTime.Now
+        });
+
+		biz.UserId = "Whatever4";
+		biz.Email = "anyone2@nowhere.org";
+		await cn.UpdateAsync<Business, long>(biz, e => e.UserId, e => e.Email);
+    }
 }
