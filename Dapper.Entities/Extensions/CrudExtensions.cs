@@ -14,7 +14,7 @@ public static class CrudExtensions
 
 	public static async Task<TEntity?> GetAsync<TEntity, TKey>(this IDbConnection connection, TKey id, IDbTransaction? transaction = null)
 		where TEntity : IEntity<TKey>
-		where TKey : struct
+		where TKey : notnull
 	{
 		var sql = GetSqlStatements<TEntity, TKey>().GetById;
 		return await connection.QuerySingleOrDefaultAsync<TEntity>(sql, new { id }, transaction);
@@ -22,7 +22,7 @@ public static class CrudExtensions
 
 	public static async Task<TEntity?> GetByAlternateKeyAsync<TEntity, TKey>(this IDbConnection connection, TEntity entity, IDbTransaction? transaction = null)
 		where TEntity : IEntity<TKey>
-		where TKey : struct
+		where TKey : notnull
 	{
 		var statements = GetSqlStatements<TEntity, TKey>();
 		if (!statements.HasAlternateKey) throw new NotImplementedException($"Entity class {typeof(TEntity).Name} is missing one or more [Key] properties.");
@@ -32,7 +32,7 @@ public static class CrudExtensions
 
 	public static async Task<TEntity> SaveAsync<TEntity, TKey>(this IDbConnection connection, TEntity entity, IDbTransaction? transaction = null)
 		where TEntity : IEntity<TKey>
-		where TKey : struct
+		where TKey : notnull
 	{
 		if (entity.IsNew())
 		{
@@ -50,7 +50,7 @@ public static class CrudExtensions
 	/// </summary>
 	public static async Task<TEntity> MergeAsync<TEntity, TKey>(this IDbConnection connection, TEntity entity, IDbTransaction? transaction = null, Action<TEntity, TEntity>? onExisting = null)
 		where TEntity : IEntity<TKey>
-		where TKey : struct
+		where TKey : notnull
 	{
 		if (entity.IsNew())
 		{
@@ -67,7 +67,7 @@ public static class CrudExtensions
 
 	public static async Task<TEntity> InsertAsync<TEntity, TKey>(this IDbConnection connection, TEntity entity, IDbTransaction? transaction = null)
 		where TEntity : IEntity<TKey>
-		where TKey : struct
+		where TKey : notnull
 	{
 		var sql = GetSqlStatements<TEntity, TKey>().Insert;
 		var id = await connection.ExecuteScalarAsync<TKey>(sql, entity, transaction);
@@ -78,7 +78,7 @@ public static class CrudExtensions
 
 	public static async Task UpdateAsync<TEntity, TKey>(this IDbConnection connection, TEntity entity, IDbTransaction? transaction = null)
 		where TEntity : IEntity<TKey>
-		where TKey : struct
+		where TKey : notnull
 	{
 		var sql = GetSqlStatements<TEntity, TKey>().Update;
 		await connection.ExecuteAsync(sql, entity, transaction);
@@ -86,7 +86,7 @@ public static class CrudExtensions
 
 	public static async Task DeleteAsync<TEntity, TKey>(this IDbConnection connection, TKey id, IDbTransaction? transaction = null)
 		where TEntity : IEntity<TKey>
-		where TKey : struct
+		where TKey : notnull
 	{
 		var sql = GetSqlStatements<TEntity, TKey>().Delete;
 		await connection.ExecuteAsync(sql, new { id }, transaction);
@@ -94,7 +94,7 @@ public static class CrudExtensions
 
 	private static SqlStatements GetSqlStatements<TEntity, TKey>()
 		where TEntity : IEntity<TKey>
-		where TKey : struct
+		where TKey : notnull
 	{
 		ArgumentNullException.ThrowIfNull(SqlBuilder, nameof(SqlBuilder));
 
