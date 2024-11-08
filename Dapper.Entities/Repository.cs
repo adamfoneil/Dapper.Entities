@@ -16,7 +16,7 @@ public enum RepositoryAction
 public class Repository<TDatabase, TEntity, TKey>
 	where TDatabase : Database
 	where TEntity : IEntity<TKey>
-	where TKey : struct
+	where TKey : notnull
 {
 	private readonly SqlStatements _sqlStatements;
 
