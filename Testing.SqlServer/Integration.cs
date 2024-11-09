@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using Dapper;
+using System.Data;
 using Testing.Data.Entities;
 
 namespace Testing.SqlServer;
@@ -12,6 +13,34 @@ public class Integration : IntegrationBase
 		var db = GetDatabase();
 		using var cn = db.GetConnection();
 		await TestInternalAsync(db, cn);
+	}
+
+	[TestMethod]
+	public async Task UpdateSpecificColumns()
+	{
+		var db = GetDatabase();
+
+		using var cn = db.GetConnection();
+		await cn.ExecuteAsync("DELETE [dbo].[Business] WHERE [UserId] = 'hello1121'");
+
+		var biz = await db.Business.SaveAsync(new Business()
+		{
+			UserId = "hello1121",
+			DisplayName = "anything",
+			MailingAddress = "3983 Axelrod",
+			PhoneNumber = "294-2322",
+			Email = "this.email@nowhere.org"
+		});
+
+		await db.Business.UpdateAsync(biz.Id, row =>
+		{
+			row.PhoneNumber = "123-4567";
+			row.MailingAddress = null;
+		});
+
+		biz = await db.Business.GetAsync(biz.Id) ?? throw new Exception("row not found");
+		Assert.AreEqual(biz.PhoneNumber, "123-4567");
+		Assert.IsTrue(biz.MailingAddress is null);
 	}
 
 	private static async Task TestInternalAsync(LiteInvoiceDatabase db, IDbConnection cn, IDbTransaction? txn = null)

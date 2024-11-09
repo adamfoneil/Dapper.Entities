@@ -2,6 +2,7 @@
 using Dapper.Entities.Interfaces;
 using Microsoft.Extensions.Logging;
 using System.Data;
+using System.Reflection;
 
 namespace Dapper.Entities;
 
@@ -99,7 +100,7 @@ public class Repository<TDatabase, TEntity, TKey>
 		return result;
 	}
 
-	public async Task<TEntity> SaveAsync(IDbConnection connection, TEntity entity, IDbTransaction? transaction = null)
+	private async Task<TEntity> SaveInternalAsync(IDbConnection connection, TEntity entity, PropertyInfo[]? properties = null, Dictionary<string, object?>? originalValues = null, IDbTransaction? transaction = null)
 	{
 		ArgumentNullException.ThrowIfNull(nameof(entity));
 
@@ -108,13 +109,16 @@ public class Repository<TDatabase, TEntity, TKey>
 		var (allow, message) = await AllowSaveAsync(connection, action, entity, transaction);
 		if (!allow) throw new RepositoryException(action, message!);
 
-		var sql = (action is RepositoryAction.Insert) ?
-			CustomInsertCommand ?? _sqlStatements.Insert :
-			CustomUpdateCommand ?? _sqlStatements.Update;
-
 		var commandType = (action is RepositoryAction.Insert) ? InsertCommandType : UpdateCommandType;
 
 		await BeforeSaveAsync(connection, action, entity, transaction);
+
+		var modifiedProperties = ModifiedProperties(entity, properties ?? [], originalValues ?? []);
+
+		var sql =
+			(action is RepositoryAction.Insert) ? CustomInsertCommand ?? _sqlStatements.Insert :
+			(action is RepositoryAction.Update && modifiedProperties.Any()) ? _sqlStatements.UpdateColumns(modifiedProperties) :
+			CustomUpdateCommand ?? _sqlStatements.Update;
 
 		Database.Logger.LogTrace("{entityType}.{action}: {query}, {@entity}", typeof(TEntity).Name, action, sql, entity);
 
@@ -132,7 +136,11 @@ public class Repository<TDatabase, TEntity, TKey>
 		await AfterSaveAsync(connection, action, entity, transaction);
 
 		return entity;
+
 	}
+
+	public async Task<TEntity> SaveAsync(IDbConnection connection, TEntity entity, IDbTransaction? transaction = null) =>
+		await SaveInternalAsync(connection, entity, transaction: transaction);
 
 	public async Task<TEntity> SaveAsync(TEntity entity)
 	{
@@ -194,26 +202,51 @@ public class Repository<TDatabase, TEntity, TKey>
 		await DeleteAsync(cn, entity);
 	}
 
-	public async Task UpdateAsync(TKey id, Action<TEntity> setProperties, Func<TEntity>? ifNotExists = null)
+	public async Task UpdateAsync(TKey id, Action<TEntity> setProperties)
 	{
 		using var cn = Database.GetConnection();
-		await UpdateAsync(cn, id, setProperties, ifNotExists);
+		await UpdateAsync(cn, id, setProperties);
 	}
 
-	public async Task UpdateAsync(IDbConnection connection, TKey id, Action<TEntity> setProperties, Func<TEntity>? ifNotExists = null, IDbTransaction? transaction = null)
+	public async Task UpdateAsync(IDbConnection connection, TKey id, Action<TEntity> setProperties, IDbTransaction? transaction = null)
 	{
-		TEntity? row = await GetAsync(connection, id, transaction);
+		TEntity row = await GetAsync(connection, id, transaction);
 
-		if (row is null && ifNotExists is not null)
+		var (properties, rowValues) = GetRowValuesDictionary(row);
+		
+		setProperties(row);		
+
+		await SaveInternalAsync(connection, row, properties, rowValues, transaction);
+	}
+
+	private static (PropertyInfo[] Properties, Dictionary<string, object?> RowValues) GetRowValuesDictionary<T>(T entity)
+	{
+		Dictionary<string, object?> result = [];
+
+		var properties = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance);
+		foreach (var propertyInfo in properties) result.Add(propertyInfo.Name, propertyInfo.GetValue(entity));
+
+		return (properties, result);
+	}
+
+	private static string[] ModifiedProperties<T>(T entity, PropertyInfo[] properties, Dictionary<string, object?> originalValues)
+	{
+		if (!properties.Any()) return [];
+
+		var modifiedProperties = new List<string>();
+		
+		foreach (var propertyInfo in properties)
 		{
-			row = ifNotExists.Invoke();
+			var originalValue = originalValues[propertyInfo.Name];
+			var currentValue = propertyInfo.GetValue(entity);
+
+			if (!Equals(originalValue, currentValue))
+			{
+				modifiedProperties.Add(propertyInfo.Name);
+			}
 		}
 
-		ArgumentNullException.ThrowIfNull(row, nameof(row));
-
-		setProperties(row);
-
-		await SaveAsync(connection, row, transaction);
+		return [.. modifiedProperties];
 	}
 
 	protected virtual async Task AfterGetAsync(IDbConnection connection, TEntity entity, IDbTransaction? transaction) => await Task.CompletedTask;

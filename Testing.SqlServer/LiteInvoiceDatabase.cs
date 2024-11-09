@@ -4,11 +4,7 @@ using Testing.Data.Entities;
 
 namespace Testing.SqlServer;
 
-public class LiteInvoiceDatabase : SqlServerDatabase
+public class LiteInvoiceDatabase(string connectionString, ILogger<LiteInvoiceDatabase> logger) : SqlServerDatabase(connectionString, logger)
 {
-	public LiteInvoiceDatabase(string connectionString, ILogger<LiteInvoiceDatabase> logger) : base(connectionString, logger)
-	{
-	}
-
 	public BaseRepository<Business> Business => new(this);
 }
