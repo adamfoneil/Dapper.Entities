@@ -102,6 +102,12 @@ Use the `[Key]` attribute on any combination of properties to define an entity's
 
 Note that if you use your entity classes with EF Core, you can't use multiple `[Key]` attributes on the same class. If you need your code to be EF-compatible, use the [IAlternateKey](https://github.com/adamfoneil/Dapper.Entities/blob/master/Dapper.Entities.Abstractions/Interfaces/IAlternateKey.cs) interface, as in [this example](https://github.com/adamfoneil/Dapper.Entities/blob/master/Testing.Common/Models/CompositeKeyEntity.cs#L19).
 
+# Repository Features
+The core repository implementation is [Repository.cs](https://github.com/adamfoneil/Dapper.Entities/blob/master/Dapper.Entities/Repository.cs). Key methods to know:
+- The [SaveAsync](https://github.com/adamfoneil/Dapper.Entities/blob/master/Dapper.Entities/Repository.cs#L145) handles both inserts and updates, so it's your go-to method for typical CRUD inserts and updates. This method updates all columns in the entity's backing table.
+- The [UpdateAsync](https://github.com/adamfoneil/Dapper.Entities/blob/master/Dapper.Entities/Repository.cs#L205) method fetches a record, then executes your `setProperties` delegate on it. When updating the database, it includes only the columns you modified. See [test example](https://github.com/adamfoneil/Dapper.Entities/blob/master/Testing.SqlServer/Integration.cs#L35).
+- The [MergeAsync](https://github.com/adamfoneil/Dapper.Entities/blob/master/Dapper.Entities/Repository.cs#L166) method attempts an update based on key columns of your entity before using the `Id`. In this way it's slightly less efficient, but it lets you update rows without knowing the `Id` beforehand.
+
 # Extension Methods
 If you need more direct entity access without a repository class, there are `IDbConnection` CRUD [extension methods](https://github.com/adamfoneil/Dapper.Entities/blob/master/Dapper.Entities/Extensions/CrudExtensions.cs). These methods don't apply any "business logic" per se that a repository class would, but are offered for convenience. See [tests](https://github.com/adamfoneil/Dapper.Entities/blob/master/Testing.SqlServer/Crud.cs) to see these in use. (The [Postgres tests](https://github.com/adamfoneil/Dapper.Entities/blob/master/Testing.PostgreSql/Crud.cs) are essentially the same.)
 
