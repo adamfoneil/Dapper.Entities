@@ -69,7 +69,7 @@ public class DefaultSqlBuilder : SqlBuilder
 
 	private string BuildInsert(string tableName, IEnumerable<ColumnMapping> columns, IEnumerable<string>? propertyNames = null)
 	{
-		var (names, values) = GetInsertComponents(columns, (col) => FormatName(col.ColumnName), propertyNames);
+		var (names, values) = GetInsertComponents(columns, (col) => FormatName(col.ColumnName));
 		return $@"INSERT INTO {tableName} ({names}) VALUES ({values}) RETURNING {FormatName("Id")};";
 	}
 
