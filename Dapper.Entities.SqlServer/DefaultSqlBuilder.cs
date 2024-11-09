@@ -23,7 +23,8 @@ public class DefaultSqlBuilder : SqlBuilder
 			Update = BuildUpdate(tableName, columnMappings),
 			Delete = BuildDelete(tableName, columnMappings),
 			ColumnMappings = columnMappings,
-			TableName = tableName
+			TableName = tableName,			
+			UpdateColumns = (properties) => BuildUpdate(tableName, columnMappings, properties)
 		};
 	}
 
@@ -41,9 +42,9 @@ public class DefaultSqlBuilder : SqlBuilder
 		return $"DELETE {tableName} WHERE {deleteCriteria};";
 	}
 
-	private static string BuildUpdate(string tableName, IEnumerable<ColumnMapping> columns)
+	private static string BuildUpdate(string tableName, IEnumerable<ColumnMapping> columns, IEnumerable<string>? propertyNames = null)
 	{
-		var (setColumns, whereClause) = GetUpdateComponents(columns, SetExpression);
+		var (setColumns, whereClause) = GetUpdateComponents(columns, SetExpression, propertyNames);
 		return $"UPDATE {tableName} SET {setColumns} WHERE {whereClause};";
 	}
 

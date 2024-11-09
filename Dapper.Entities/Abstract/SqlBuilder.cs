@@ -5,6 +5,7 @@ using Dapper.Entities.Interfaces;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
+using System.Linq.Expressions;
 using System.Reflection;
 
 namespace Dapper.Entities.Abstract;
@@ -12,6 +13,26 @@ namespace Dapper.Entities.Abstract;
 public abstract class SqlBuilder : ISqlBuilder
 {
 	public abstract SqlStatements BuildStatements(Type entityType);
+
+	public static IEnumerable<string> GetPropertyNames<T>(IEnumerable<Expression<Func<T, object>>> properties) =>
+		properties.Select(GetPropertyName);
+
+	private static string GetPropertyName<T>(Expression<Func<T, object>> expression)
+	{
+		if (expression.Body is UnaryExpression unaryExpression &&
+			unaryExpression.Operand is MemberExpression memberExpression)
+		{
+			// This handles the case where the property is cast to object
+			return memberExpression.Member.Name;
+		}
+		else if (expression.Body is MemberExpression simpleMemberExpression)
+		{
+			// This handles the case where the property is accessed directly
+			return simpleMemberExpression.Member.Name;
+		}
+
+		throw new ArgumentException("Invalid expression");
+	}
 
 	protected static (string Schema, string Name) ParseTableName(Type type, string defaultSchema, Func<string, string>? nameFormatter = null)
 	{
@@ -36,23 +57,29 @@ public abstract class SqlBuilder : ISqlBuilder
 	}
 
 	protected static (string Columns, string Values) GetInsertComponents(IEnumerable<ColumnMapping> columns, Func<ColumnMapping, string> columnNameBuilder)
-	{
+	{	
 		if (!columns.Any(col => col.ForInsert)) throw new ArgumentException("Must have at least one insert column");
 		var insertCols = string.Join(", ", columns.Where(col => col.ForInsert).Select(col => columnNameBuilder(col)));
 		var insertValues = string.Join(", ", columns.Where(col => col.ForInsert).Select(col => $"@{col.ParameterName}"));
 		return (insertCols, insertValues);
 	}
 
-	protected static (string SetValues, string WhereClause) GetUpdateComponents(IEnumerable<ColumnMapping> columns, Func<ColumnMapping, string> expressionBuilder)
+	protected static (string SetValues, string WhereClause) GetUpdateComponents(IEnumerable<ColumnMapping> columns, Func<ColumnMapping, string> expressionBuilder, IEnumerable<string>? propertyNames = null)
 	{
 		if (!columns.Any(col => col.IsKey)) throw new ArgumentException("Must have at least one key column");
 		if (!columns.Any(col => col.ForUpdate)) throw new ArgumentException("Must have at least one update column");
 
-		var setValues = string.Join(", ", columns.Where(col => col.ForUpdate).Select(col => expressionBuilder(col)));
+		var setValues = string.Join(", ", UseMappings(columns, propertyNames).Where(col => col.ForUpdate).Select(col => expressionBuilder(col)));
 		var whereClause = string.Join(" AND ", columns.Where(UpdateOrDelete).Select(col => expressionBuilder(col)));
 
 		return (setValues, whereClause);
 	}
+
+	private static IEnumerable<ColumnMapping> UseMappings(IEnumerable<ColumnMapping> columns, IEnumerable<string>? propertyNames = null)
+	{
+		propertyNames ??= columns.Select(m => m.ParameterName).ToArray();
+		return columns.Join(propertyNames, m => m.ParameterName, p => p, (m, p) => m, StringComparer.OrdinalIgnoreCase);
+	}		
 
 	protected static bool UpdateOrDelete(ColumnMapping mapping) => mapping.IsKey && !mapping.ForUpdate;
 

@@ -16,6 +16,11 @@ public class Crud : IntegrationBase
 		using var cn = GetConnection();
 		using var txn = cn.BeginTransaction();
 
+		int deleted = await cn.ExecuteAsync("DELETE [dbo].[Business] WHERE [UserId]=@userId", new
+		{
+			userId = "whatever2"
+		}, txn);
+
 		var biz = await cn.InsertAsync<Business, long>(new()
 		{
 			DisplayName = "WhateverThis",
@@ -31,12 +36,12 @@ public class Crud : IntegrationBase
 		Assert.IsTrue(savedId == biz.Id);
 
 		biz.Email = "anyone2@nowhere.org";
-		biz.UserId = "whatever3";
+		biz.UserId = "whatever-2";
 		await cn.UpdateAsync<Business, long>(biz, txn);
 
 		biz = await cn.GetAsync<Business, long>(biz.Id, txn) ?? throw new Exception("row not found");
 		Assert.IsTrue(biz.Email.Equals("anyone2@nowhere.org"));
-		Assert.IsTrue(biz.UserId.Equals("whatever3"));
+		Assert.IsTrue(biz.UserId.Equals("whatever-2"));
 
 		await cn.DeleteAsync<Business, long>(biz.Id, txn);
 
@@ -83,5 +88,33 @@ public class Crud : IntegrationBase
 		var mergedRow = await cn.GetAsync<Business, long>(mergedId) ?? throw new Exception("row not found");
 		Assert.AreEqual(mergedRow.DisplayName, "Save and Merge Test 2");
 		Assert.IsTrue(mergedRow.DateModified.HasValue);
+	}
+
+	[TestMethod]
+	public async Task ExplicitColumnOps()
+	{
+		CrudExtensions.SqlBuilder = new DefaultSqlBuilder();
+
+		using var cn = GetConnection();
+		
+		int deleted = await cn.ExecuteAsync("DELETE [dbo].[Business] WHERE [UserId]=@userId", new
+		{
+			userId = "whatever3"
+		});
+
+		var biz = await cn.InsertAsync<Business, long>(new()
+		{
+			DisplayName = "AnotherBiz",
+			Email = "anyone@nowhere.org",
+			UserId = "whatever3",
+			DateCreated = DateTime.Now
+		});
+
+		biz.Email = "anyone2@nowhere.org";
+		await cn.UpdateAsync<Business, long>(biz, b => b.Email);
+
+		biz = await cn.GetAsync<Business, long>(biz.Id) ?? throw new Exception("row not found");
+		Assert.AreEqual(biz.Email, "anyone2@nowhere.org");
+		Assert.AreEqual(biz.DisplayName, "AnotherBiz");		
 	}
 }

@@ -44,7 +44,8 @@ public class DefaultSqlBuilder : SqlBuilder
 			Update = BuildUpdate(tableName, columnMappings),
 			Delete = BuildDelete(tableName, columnMappings),
 			ColumnMappings = columnMappings,
-			TableName = tableName
+			TableName = tableName,			
+			UpdateColumns = (properties) => BuildUpdate(tableName, columnMappings, properties)
 		};
 	}
 
@@ -54,7 +55,7 @@ public class DefaultSqlBuilder : SqlBuilder
 		return $"DELETE FROM {tableName} WHERE {deleteCriteria}";
 	}
 
-	private string BuildUpdate(string tableName, IEnumerable<ColumnMapping> columns)
+	private string BuildUpdate(string tableName, IEnumerable<ColumnMapping> columns, IEnumerable<string>? updateColumns = null)
 	{
 		var (setColumns, whereClause) = GetUpdateComponents(columns, SetExpression);
 		return $"UPDATE {tableName} SET {setColumns} WHERE {whereClause}";
@@ -66,9 +67,9 @@ public class DefaultSqlBuilder : SqlBuilder
 		return $"SELECT {columnNames} FROM {tableName} WHERE {criteria}";
 	}
 
-	private string BuildInsert(string tableName, IEnumerable<ColumnMapping> columns)
+	private string BuildInsert(string tableName, IEnumerable<ColumnMapping> columns, IEnumerable<string>? propertyNames = null)
 	{
-		var (names, values) = GetInsertComponents(columns, (col) => FormatName(col.ColumnName));
+		var (names, values) = GetInsertComponents(columns, (col) => FormatName(col.ColumnName), propertyNames);
 		return $@"INSERT INTO {tableName} ({names}) VALUES ({values}) RETURNING {FormatName("Id")};";
 	}
 

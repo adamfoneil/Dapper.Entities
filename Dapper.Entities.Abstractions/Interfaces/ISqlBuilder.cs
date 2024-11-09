@@ -4,7 +4,7 @@ namespace Dapper.Entities.Interfaces;
 
 public interface ISqlBuilder
 {
-	SqlStatements BuildStatements(Type entityType);	
+	SqlStatements BuildStatements(Type entityType);
 }
 
 public class SqlStatements
@@ -16,6 +16,7 @@ public class SqlStatements
 	public string Update { get; init; } = default!;
 	public string Delete { get; init; } = default!;
 	public ColumnMapping[] ColumnMappings { get; init; } = [];
-	public string TableName { get; init; } = default!;
+	public string TableName { get; init; } = default!;	
+	public required Func<IEnumerable<string>, string> UpdateColumns { get; init; }
 }
 
