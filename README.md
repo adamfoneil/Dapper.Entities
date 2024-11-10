@@ -94,7 +94,7 @@ public class MyDatabase : SqlServerDatabase
 5. In the startup of your application add your `Database` class to your services collection as either a scoped or singleton dependency. Now throughout your application you can inject it where needed and have access to your repository classes.
 
 # Entity class considerations
-The only requirement for entity classes you use with this library is that they implement [IEntity\<TKey\>](https://github.com/adamfoneil/Dapper.Entities/blob/master/Dapper.Entities.Abstractions/Interfaces/IEntity.cs), which you install with the [Dapper.Entities.Abstractions](https://www.nuget.org/packages/Dapper.Entities.Abstractions) package, which is installed automatically as a dependency of either main package. This gives your entity classes an `Id` property in the struct type of your choice.
+The only requirement for entity classes you use with this library is that they implement [IEntity\<TKey\>](https://github.com/adamfoneil/Dapper.Entities/blob/master/Dapper.Entities.Abstractions/Interfaces/IEntity.cs), which you install with the [Dapper.Entities.Abstractions](https://www.nuget.org/packages/Dapper.Entities.Abstractions) package, which is installed automatically as a dependency of either main package. This gives your entity classes an `Id` property, on which many subsequent actions (Save, Delete, Merge, etc) depend.
 
 You can use the `[NotMapped]` attribute on columns that don't save directly to your database table. Likewise, you can also use `[NotUpdated]` and `[NotInserted]` to get finer control on column save behavior.
 
