@@ -130,12 +130,15 @@ await db.Employees.SaveAsync(emp);
 
 <details>
   <summary>Example</summary>
+
+  ```csharp
   // update select columns only
   await db.Employees.UpdateAsync(emp.Id, emp =>
   {
     emp.LastName = "New Last Name";
     emp.PhoneNumber = "994-342-3827";
   });
+  ```
 </details>
 
 - The [MergeAsync](https://github.com/adamfoneil/Dapper.Entities/blob/master/Dapper.Entities/Repository.cs#L166) method attempts an update based on key columns of your entity before using the `Id`. In this way it's slightly less efficient, but it lets you update rows without knowing the `Id` beforehand. To leverage this, your entity classes need to use the `[Key]` attribute on at least one column (not the `Id`) or implement [IAlternateKey](https://github.com/adamfoneil/Dapper.Entities/blob/master/Dapper.Entities.Abstractions/Interfaces/IAlternateKey.cs).
