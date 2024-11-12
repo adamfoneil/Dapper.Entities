@@ -179,8 +179,6 @@ There's also a [PostgreSql implementation](https://github.com/adamfoneil/Dapper.
 # Next Steps
 In the walkthrough above, I have a single `BaseRepository` assumed to be used with all tables. In a realistic application, you'd have tables with unique business logic such as trigger-like behavior, permission checks, validation, change tracking, audit tracking, and so on. This library doesn't provide any of that capability built-in. Rather, this library provides many virtual methods in the [Repository](https://github.com/adamfoneil/Dapper.Entities/blob/master/Dapper.Entities/Repository.cs) class such as `BeforeSaveAsync`, `AfterSaveAsync`, `BeforeDeleteAsync` to let you richly [customize](https://github.com/adamfoneil/Dapper.Entities/blob/master/Dapper.Entities/Repository.cs#L219-L233) your data access.
 
-Check out my [Ensync](https://github.com/adamfoneil/Ensync) project to see how you can do code-first entity development in SQL Server without migrations. Please note I don't have this working for PostgreSql.
-
 See also [LiteInvoice3](https://github.com/adamfoneil/LiteInvoice3), an application I'm working on that uses this project for its data access layer.
 
 # Transactions / Unit-of-work
