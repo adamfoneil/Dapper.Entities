@@ -105,6 +105,20 @@ Note that if you use your entity classes with EF Core, you can't use multiple `[
 # Repository Features
 The core repository implementation is [Repository.cs](https://github.com/adamfoneil/Dapper.Entities/blob/master/Dapper.Entities/Repository.cs). Key methods to know:
 - The [SaveAsync](https://github.com/adamfoneil/Dapper.Entities/blob/master/Dapper.Entities/Repository.cs#L145) handles both inserts and updates, so it's your go-to method for typical CRUD inserts and updates. This method updates all columns in the entity's backing table.
+
+<details>
+  <summary>Example</summary>
+
+```csharp
+await db.Employees.SaveAsync(new()
+{
+  FirstName = "Person",
+  LastName = "Smith",
+  PhoneNumber = "343-349-4268"
+});
+```
+</details>
+
 - The [UpdateAsync](https://github.com/adamfoneil/Dapper.Entities/blob/master/Dapper.Entities/Repository.cs#L205) method fetches a record, then executes your `setProperties` delegate on it. When updating the database, it includes only the columns you modified. See [test example](https://github.com/adamfoneil/Dapper.Entities/blob/master/Testing.SqlServer/Integration.cs#L35).
 - The [MergeAsync](https://github.com/adamfoneil/Dapper.Entities/blob/master/Dapper.Entities/Repository.cs#L166) method attempts an update based on key columns of your entity before using the `Id`. In this way it's slightly less efficient, but it lets you update rows without knowing the `Id` beforehand. To leverage this, your entity classes need to use the `[Key]` attribute on at least one column (not the `Id`) or implement [IAlternateKey](https://github.com/adamfoneil/Dapper.Entities/blob/master/Dapper.Entities.Abstractions/Interfaces/IAlternateKey.cs).
 - The merits of repository classes become more clear when you add business logic, validation, and permission checks, trigger-like behavior and so on to your repository classes by overriding these [virtual methods](https://github.com/adamfoneil/Dapper.Entities/blob/master/Dapper.Entities/Repository.cs#L252-L266). This example in the [test project](https://github.com/adamfoneil/Dapper.Entities/blob/master/Testing.SqlServer/BaseRepository.cs) updates some timestamp columns whenever a row is inserted or updated.
