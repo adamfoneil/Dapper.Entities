@@ -23,7 +23,7 @@ public class Integration : IntegrationBase
 		using var cn = db.GetConnection();
 		await cn.ExecuteAsync("DELETE [dbo].[Business] WHERE [UserId] = 'hello1121'");
 
-		var biz = await db.Business.SaveAsync(new Business()
+		var biz = await db.Business.SaveAsync(new()
 		{
 			UserId = "hello1121",
 			DisplayName = "anything",
@@ -45,7 +45,7 @@ public class Integration : IntegrationBase
 
 	private static async Task TestInternalAsync(LiteInvoiceDatabase db, IDbConnection cn, IDbTransaction? txn = null)
 	{
-		var result = await db.Business.SaveAsync(cn, new Business()
+		var result = await db.Business.SaveAsync(cn, new()
 		{
 			UserId = "hello",
 			DisplayName = "anything",
