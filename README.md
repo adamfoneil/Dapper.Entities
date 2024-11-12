@@ -110,16 +110,34 @@ The core repository implementation is [Repository.cs](https://github.com/adamfon
   <summary>Example</summary>
 
 ```csharp
+// performs an insert
 await db.Employees.SaveAsync(new()
 {
   FirstName = "Person",
   LastName = "Smith",
-  PhoneNumber = "343-349-4268"
+  PhoneNumber = "343-349-4268",
+  Address = "232 Whatever St"
 });
+
+// performs an update of all columns (no matter what you changed)
+var emp = await db.Employees.GetAsync(id);
+emp.LastName = "New Last Name";
+await db.Employees.SaveAsync(emp);
 ```
 </details>
 
 - The [UpdateAsync](https://github.com/adamfoneil/Dapper.Entities/blob/master/Dapper.Entities/Repository.cs#L205) method fetches a record, then executes your `setProperties` delegate on it. When updating the database, it includes only the columns you modified. See [test example](https://github.com/adamfoneil/Dapper.Entities/blob/master/Testing.SqlServer/Integration.cs#L35).
+
+<details>
+  <summary>Example</summary>
+  // update select columns only
+  await db.Employees.UpdateAsync(emp.Id, emp =>
+  {
+    emp.LastName = "New Last Name";
+    emp.PhoneNumber = "994-342-3827";
+  });
+</details>
+
 - The [MergeAsync](https://github.com/adamfoneil/Dapper.Entities/blob/master/Dapper.Entities/Repository.cs#L166) method attempts an update based on key columns of your entity before using the `Id`. In this way it's slightly less efficient, but it lets you update rows without knowing the `Id` beforehand. To leverage this, your entity classes need to use the `[Key]` attribute on at least one column (not the `Id`) or implement [IAlternateKey](https://github.com/adamfoneil/Dapper.Entities/blob/master/Dapper.Entities.Abstractions/Interfaces/IAlternateKey.cs).
 - The merits of repository classes become more clear when you add business logic, validation, and permission checks, trigger-like behavior and so on to your repository classes by overriding these [virtual methods](https://github.com/adamfoneil/Dapper.Entities/blob/master/Dapper.Entities/Repository.cs#L252-L266). This example in the [test project](https://github.com/adamfoneil/Dapper.Entities/blob/master/Testing.SqlServer/BaseRepository.cs) updates some timestamp columns whenever a row is inserted or updated.
 - All public repository methods `Get`, `Save`, `Merge`, `Delete` etc have two overloads: one that accepts a connection, and one that doesn't. If you need to combine multiple operations in a single round trip, use the overloads that accept a connection so you aren't opening and closing connections too often. Note also you can wrap multiple actions in a transaction using the `DoTransactionAsync` method. More on that below.
