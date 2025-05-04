@@ -105,8 +105,64 @@ Note that if you use your entity classes with EF Core, you can't use multiple `[
 # Repository Features
 The core repository implementation is [Repository.cs](https://github.com/adamfoneil/Dapper.Entities/blob/master/Dapper.Entities/Repository.cs). Key methods to know:
 - The [SaveAsync](https://github.com/adamfoneil/Dapper.Entities/blob/master/Dapper.Entities/Repository.cs#L145) handles both inserts and updates, so it's your go-to method for typical CRUD inserts and updates. This method updates all columns in the entity's backing table.
+
+<details>
+  <summary>Example</summary>
+
+```csharp
+// performs an insert
+await db.Employees.SaveAsync(new()
+{
+  FirstName = "Person",
+  LastName = "Smith",
+  PhoneNumber = "343-349-4268",
+  Address = "232 Whatever St"
+});
+
+// performs an update of all columns (no matter what you changed)
+var emp = await db.Employees.GetAsync(id);
+emp.LastName = "New Last Name";
+await db.Employees.SaveAsync(emp);
+```
+</details>
+
 - The [UpdateAsync](https://github.com/adamfoneil/Dapper.Entities/blob/master/Dapper.Entities/Repository.cs#L205) method fetches a record, then executes your `setProperties` delegate on it. When updating the database, it includes only the columns you modified. See [test example](https://github.com/adamfoneil/Dapper.Entities/blob/master/Testing.SqlServer/Integration.cs#L35).
+
+<details>
+  <summary>Example</summary>
+
+  ```csharp
+  // update select columns only
+  await db.Employees.UpdateAsync(emp.Id, emp =>
+  {
+    emp.LastName = "New Last Name";
+    emp.PhoneNumber = "994-342-3827";
+  });
+  ```
+</details>
+
 - The [MergeAsync](https://github.com/adamfoneil/Dapper.Entities/blob/master/Dapper.Entities/Repository.cs#L166) method attempts an update based on key columns of your entity before using the `Id`. In this way it's slightly less efficient, but it lets you update rows without knowing the `Id` beforehand. To leverage this, your entity classes need to use the `[Key]` attribute on at least one column (not the `Id`) or implement [IAlternateKey](https://github.com/adamfoneil/Dapper.Entities/blob/master/Dapper.Entities.Abstractions/Interfaces/IAlternateKey.cs).
+
+<details>
+  <summary>Example</summary>
+
+  ```csharp
+  // searches for existing row by [Key] value (EmployeeId in this case), and inserts if not found, or updates if found. Optionally executes update-specific logic
+  await db.Employees.MergeAsync(new()
+  {
+    EmployeeId = "RK33938J",
+    LastName = "Peobody",
+    FirstName = "Athena",
+    PhoneNumber = "229-593-2934",
+    Comments = "This is an insert"
+  }, onExisting: (newRow, existing) =>
+  {
+    existing.Comments = "This is an update"
+  });
+  ```
+</details>
+
+- The [DeleteAsync](https://github.com/adamfoneil/Dapper.Entities/blob/master/Dapper.Entities/Repository.cs#L199) method does what you'd think.
 - The merits of repository classes become more clear when you add business logic, validation, and permission checks, trigger-like behavior and so on to your repository classes by overriding these [virtual methods](https://github.com/adamfoneil/Dapper.Entities/blob/master/Dapper.Entities/Repository.cs#L252-L266). This example in the [test project](https://github.com/adamfoneil/Dapper.Entities/blob/master/Testing.SqlServer/BaseRepository.cs) updates some timestamp columns whenever a row is inserted or updated.
 - All public repository methods `Get`, `Save`, `Merge`, `Delete` etc have two overloads: one that accepts a connection, and one that doesn't. If you need to combine multiple operations in a single round trip, use the overloads that accept a connection so you aren't opening and closing connections too often. Note also you can wrap multiple actions in a transaction using the `DoTransactionAsync` method. More on that below.
 
@@ -121,9 +177,7 @@ Note that you can also use [stored procedures or completely custom SQL](https://
 There's also a [PostgreSql implementation](https://github.com/adamfoneil/Dapper.Entities/blob/master/Dapper.Entities.PostgreSql/DefaultSqlBuilder.cs). As of this writing, I don't have any Postgres experience to speak of. I wanted to show that this architecture could work for a variety of backend databases, and might even start using Postgres for some things.
 
 # Next Steps
-In the walkthrough above, I have a single `BaseRepository` assumed to be used with all tables. In a realistic application, you'd have tables with unique business logic such as trigger-like behavior, permission checks, validation, change tracking, audit tracking, and so on. This library doesn't provide any of that capability built-in. Rather, this library provides many virtual methods in the [Repository](https://github.com/adamfoneil/Dapper.Entities/blob/master/Dapper.Entities/Repository.cs) class such as `BeforeSaveAsync`, `AfterSaveAsync`, `BeforeDeleteAsync` to let you richly [customize](https://github.com/adamfoneil/Dapper.Entities/blob/master/Dapper.Entities/Repository.cs#L219-L233) your data access.
-
-Check out my [Ensync](https://github.com/adamfoneil/Ensync) project to see how you can do code-first entity development in SQL Server without migrations. Please note I don't have this working for PostgreSql.
+In the walkthrough above, I have a single `BaseRepository` assumed to be used with all tables. In a realistic application, you'd have tables with unique business logic such as trigger-like behavior, permission checks, validation, change tracking, audit tracking, and so on. This library doesn't provide any of that capability built-in. Rather, this library provides many virtual methods in the [Repository](https://github.com/adamfoneil/Dapper.Entities/blob/master/Dapper.Entities/Repository.cs) class such as `BeforeSaveAsync`, `AfterSaveAsync`, `BeforeDeleteAsync` to let you richly [customize](https://github.com/adamfoneil/Dapper.Entities/blob/master/Dapper.Entities/Repository.cs#L252-L266) your data access.
 
 See also [LiteInvoice3](https://github.com/adamfoneil/LiteInvoice3), an application I'm working on that uses this project for its data access layer.
 
