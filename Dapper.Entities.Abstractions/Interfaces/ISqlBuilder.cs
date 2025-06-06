@@ -1,6 +1,4 @@
-﻿using Dapper.Entities.Abstractions.Models;
-
-namespace Dapper.Entities.Interfaces;
+﻿namespace Dapper.Entities.Interfaces;
 
 public interface ISqlBuilder
 {
@@ -19,4 +17,20 @@ public class SqlStatements
 	public string TableName { get; init; } = default!;	
 	public required Func<IEnumerable<string>, string> UpdateColumns { get; init; }
 }
+
+public class ColumnMapping
+{
+	/// <summary>
+	/// this is usually the C# property, but can be aliased with the [Column] attribute
+	/// </summary>
+	public string ColumnName { get; init; } = string.Empty;
+	/// <summary>
+	/// this is always the C# property name
+	/// </summary>
+	public string ParameterName { get; init; } = string.Empty;
+	public bool ForInsert { get; init; }
+	public bool ForUpdate { get; init; }
+	public bool IsKey { get; set; }
+}
+
 
