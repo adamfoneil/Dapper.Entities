@@ -1,0 +1,9 @@
+<Solution>
+  <Project Path="Dapper.Entities.Abstractions/Dapper.Entities.Abstractions.csproj" />
+  <Project Path="Dapper.Entities.PostgreSql/Dapper.Entities.PostgreSql.csproj" />
+  <Project Path="Dapper.Entities.SqlServer/Dapper.Entities.SqlServer.csproj" />
+  <Project Path="Dapper.Entities/Dapper.Entities.csproj" />
+  <Project Path="Testing.Common/Testing.Common.csproj" />
+  <Project Path="Testing.PostgreSql/Testing.PostgreSql.csproj" />
+  <Project Path="Testing.SqlServer/Testing.SqlServer.csproj" />
+</Solution>
